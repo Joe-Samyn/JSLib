@@ -1,4 +1,9 @@
 
+# TODO: Need to clean up builds and variable
+# TODO: List source files out, do not use wildcards b/c files may
+# 	need to be in particular order
+# TODO: Add normal build
+# TODO: Get rid of all the variables, not needed
 
 # Compiler
 GCC := gcc
