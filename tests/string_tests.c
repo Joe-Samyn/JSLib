@@ -1,5 +1,7 @@
 #include "munit.h"
 #include "jslib/jsstr.h"
+#include <stdio.h>
+
 
 
 static MunitResult test_add_numbers(const MunitParameter params[], void* fixture) {
@@ -7,11 +9,13 @@ static MunitResult test_add_numbers(const MunitParameter params[], void* fixture
 	int result = add(1, 3);
 	munit_assert_int(result, ==, 4);
 
+	return MUNIT_OK;
+
 }
 
 
 /* Define Test Suite */
-MunitTests tests[] = {
+static MunitTest tests[] = {
 	{
 		"/test-add-numbers",
 		test_add_numbers,
@@ -19,10 +23,12 @@ MunitTests tests[] = {
 		NULL,
 		MUNIT_TEST_OPTION_NONE,
 		NULL
-	}
+	},
+	// Required to end array with null terminating entry b/c otherwise munit seg faults
+	{ NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
 };
 
-static const MunitSuite string_suite = {
+const MunitSuite string_suite = {
 	"/string-tests",
 	tests,
 	NULL,

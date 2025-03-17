@@ -12,13 +12,17 @@ DEBUG := -g
 
 # Directories
 BUILD := build
-TARGET := jlib.a
+TARGET := libjslib.a
 SRC := src
+TEST_TARGET := test.exe
 TESTS := tests
 
 # Files
 SRC_FILES := $(wildcard ${SRC}/*.c)
-TEST_FILES := $(wildcard ${TESTS}/*.c)
+TEST_FILES := ${TESTS}/string_tests.c \
+	      ${TESTS}/munit.c \
+	      ${TESTS}/test_runner.c
+	      
 
 OBJ_FILES := $(patsubst ${SRC}/%.c, ${BUILD}/${SRC}/%.o, ${SRC_FILES})
 TEST_OBJ_FILES := $(patsubst ${TESTS}/%.c, ${BUILD}/${TESTS}/%.o, ${TEST_FILES})
@@ -29,12 +33,27 @@ debug: ${BUILD}/${TARGET}
 # Build static library target
 ${BUILD}/${TARGET}: ${OBJ_FILES}
 	echo "Building target..."
-	${AR} rcs $@ $<
+	${AR} rcs $@ $^
 
 ${BUILD}/${SRC}/%.o: ${SRC}/%.c
 	@mkdir -p build
 	@mkdir -p build/src
 	${GCC} ${C_FLAGS} ${INCLUDES} ${DEBUG} -c $< -o $@
+
+
+test: ${BUILD}/${TEST_TARGET}
+	@echo "Running tests.."
+	./${BUILD}/${TEST_TARGET}
+
+# Build Test executable from object files 
+${BUILD}/${TEST_TARGET}: ${TEST_OBJ_FILES}
+	@echo ${TEST_OBJ_FILES}
+	${GCC} ${C_FLAGS} ${DEBUG} ${INCLUDES} -Lbuild $^ -ljslib -o $@
+
+${BUILD}/${TESTS}/%.o: ${TESTS}/%.c
+	${GCC} ${C_FLAGS} ${DEBUG} ${INCLUDES} -c $< -o $@
+
+
 
 clean:
 	@echo "Cleaning build directory.."
