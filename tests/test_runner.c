@@ -6,6 +6,7 @@ extern const MunitSuite string_suite;
 
 
 int main(int argc, char* argv[]) {
+	
 	MunitSuite suites[] = {
 		string_suite,
 		NULL
