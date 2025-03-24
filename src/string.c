@@ -1,4 +1,4 @@
-#include "jslib/jsstr.h"
+#include "jslib/string.h"
 
 
 // TODO: We can create a safe_str_len function that takes a max length from the user

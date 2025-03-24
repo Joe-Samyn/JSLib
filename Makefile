@@ -24,7 +24,7 @@ TARGET := ${BUILD_DIR}/${BUILD}/libjslib.a
 TEST_TARGET := ${BUILD_DIR}/test.exe
 
 # Files
-SRC_FILES := ${SRC_DIR}/jsstr.c
+SRC_FILES := ${SRC_DIR}/string.c
 
 TEST_FILES := ${TESTS_DIR}/string_tests.c \
 	      ${TESTS_DIR}/munit.c \

@@ -1,5 +1,5 @@
 #include "munit.h"
-#include "jslib/jsstr.h"
+#include "jslib/string.h"
 #include <stdio.h>
 
 
