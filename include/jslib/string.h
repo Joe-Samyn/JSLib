@@ -11,6 +11,7 @@
  * string compare 
  */
 
+#define STR_END '\0'
 
 /**
  * @brief Computes the length of a string 
