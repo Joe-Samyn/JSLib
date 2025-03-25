@@ -1,6 +1,8 @@
 #include "munit.h"
 #include "jslib/string.h"
 #include <stdio.h>
+#include <stdlib.h>
+ 
 
 
 static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
@@ -32,6 +34,21 @@ static MunitResult test_str_len_long_string(const MunitParameter params[], void*
 	return MUNIT_OK;
 }
 
+
+static MunitResult test_str_cpy(const MunitParameter params[], void* fixture) {
+	
+	// TODO: Needs to be changed to use this libraries memory allocation 
+	char* src = "Hello!";
+	char* dest = (char*)malloc(sizeof(char) * (str_len(src) + 1));
+	
+	str_cpy(dest, src);
+
+	munit_assert_string_equal(dest, src);
+
+	return MUNIT_OK;	
+}
+
+
 /* Define Test Suite */
 static MunitTest tests[] = {
 	{
@@ -45,6 +62,14 @@ static MunitTest tests[] = {
 	{
 		"/test-str-len-long-string",
 		test_str_len_long_string,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"/test-str-cpy",
+		test_str_cpy,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,

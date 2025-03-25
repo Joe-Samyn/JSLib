@@ -19,12 +19,18 @@ int str_len(const char* str) {
 }
 
 
-char *str_cpy(char* restrict dest, char* restrict src)  {
+char* str_cpy(char* restrict dest, char* restrict src)  {
 	
 	// Loop over src using pointer arithmetic and copy characters into dest
 	// TODO: Could also benefit from SIMD or vectorized instructions 
 	char cursor = *src;
 	while (cursor != STR_END) {
-		
+		*dest = cursor;
+
+		src++;
+		dest++;
+		cursor = *src;
 	}
+	
+	return dest;
 }
