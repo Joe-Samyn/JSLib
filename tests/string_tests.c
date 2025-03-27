@@ -48,6 +48,20 @@ static MunitResult test_str_cpy(const MunitParameter params[], void* fixture) {
 	return MUNIT_OK;	
 }
 
+static MunitResult test_str_ncpy_n_less_than_length(const MunitParameter params[], void* fixture) {
+	// TODO: Needs to be changed to use library memory allocator
+	char src[] = "Hello";
+	char* dest = (char*)malloc(sizeof(char) * 3);
+	
+	char exp = "Hel";
+
+	dest = str_ncpy(dest, src, 3);
+
+	munit_assert_string_equal(dest, exp);
+
+	return MUNIT_OK;
+}
+
 
 /* Define Test Suite */
 static MunitTest tests[] = {
@@ -70,6 +84,14 @@ static MunitTest tests[] = {
 	{
 		"/test-str-cpy",
 		test_str_cpy,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"/test-str-ncpy-n-less-than-length",
+		test_str_ncpy_n_less_than_length,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,

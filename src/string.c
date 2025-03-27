@@ -34,3 +34,20 @@ char* str_cpy(char* restrict dest, char* restrict src)  {
 	
 	return dest;
 }
+
+char* str_ncpy(char* restrict dest, char* restrict src, int n) {
+	
+	// Copy characters until either n is hit or '\0' is hit	
+	char cursor = *src;
+	int num_chars = 0;
+	while (cursor != '\0' && num_chars < n) {
+		*dest = cursor;
+
+		dest++;
+		src++;
+		cursor = *src;
+		num_chars++;
+	}
+
+	return dest;
+}

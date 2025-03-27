@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
 	
 	MunitSuite suites[] = {
 		string_suite,
-		NULL
+		{ NULL, NULL, NULL, 0, MUNIT_SUITE_OPTION_NONE }  // Sentinel entry
 	};
 
 	MunitSuite main_suite = {
