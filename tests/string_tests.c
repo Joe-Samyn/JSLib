@@ -4,8 +4,7 @@
 #include <stdlib.h>
  
 
-
-static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
+ static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
 
 	char* test_str = "Hello, world!\0";
 	int exp = 13;
@@ -30,7 +29,6 @@ static MunitResult test_str_len_long_string(const MunitParameter params[], void*
 	int result = str_len(str);
 
 	munit_assert_int(result, ==, exp);
-
 	return MUNIT_OK;
 }
 
@@ -48,14 +46,14 @@ static MunitResult test_str_cpy(const MunitParameter params[], void* fixture) {
 	return MUNIT_OK;	
 }
 
-static MunitResult test_str_ncpy_n_less_than_length(const MunitParameter params[], void* fixture) {
+MunitResult test_str_ncpy_n_less_than_length(const MunitParameter params[], void* fixture) {
 	// TODO: Needs to be changed to use library memory allocator
 	char src[] = "Hello";
 	char* dest = (char*)malloc(sizeof(char) * 3);
 	
-	char exp = "Hel";
+	char* exp = "Hel";
 
-	dest = str_ncpy(dest, src, 3);
+	str_ncpy(dest, src, 3);
 
 	munit_assert_string_equal(dest, exp);
 

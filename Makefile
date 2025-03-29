@@ -82,5 +82,4 @@ clean:
 	@rm -rf build/src
 	@rm -rf build/tests
 	@rm -rf build/*
-	@echo "Creating new build directory and subdirectories"
 

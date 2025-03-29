@@ -36,18 +36,34 @@ char* str_cpy(char* restrict dest, char* restrict src)  {
 }
 
 char* str_ncpy(char* restrict dest, char* restrict src, int n) {
+
+	/*
+		TODO:
+			- n should never be < 0, so it should be unsigned 
+			- dest and src could be null pointers
+			- src can be const 
+			- restrict may not be best b/c someone could use this method in scenario
+			where pointers alias 
+			- How do we ensure we stay in bounds of pointers and do not buffer overlfow
+			- Research Defensive programming in C and buffer overflow prevention strategies
+			- Research how strncpy works, it fills remaining space of dest with \0 if src
+			shorter than n
+			- How should we return dest? Do we need to rewind or use copy of pointer? 
+	*/
 	
 	// Copy characters until either n is hit or '\0' is hit	
-	char cursor = *src;
 	int num_chars = 0;
-	while (cursor != '\0' && num_chars < n) {
-		*dest = cursor;
+	while (*src != '\0' && num_chars < n) {
+		*dest = *src;
 
 		dest++;
 		src++;
-		cursor = *src;
 		num_chars++;
 	}
+
+	// Reset pointers
+	dest -= num_chars;
+	src -= num_chars;
 
 	return dest;
 }
