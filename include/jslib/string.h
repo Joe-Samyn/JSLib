@@ -27,7 +27,10 @@ typedef enum {
     STR_INVALID_OPERAND,
     
     // An unknown error occurred when trying to perform the string operation
-    STR_UKNOWN_ERR
+    STR_UKNOWN_ERR,
+    
+    // The string that resulted from the operation is missing a null terminating character
+    STR_MISSING_TERM
 } StrResult;
 
 /**
@@ -49,12 +52,15 @@ char* str_cpy(char* dest, const char* src);
 /**
  * @brief Copies at most a count, n, of a null terminated string
  * @param dest A pointer to the destination buffer to copy to
+ * @param dest_size The size of the dest in number of bytes, it must be at least larger than max_chars + 1 
  * @param src A pointer to the null terminated string to copy from 
  * @param n The maximum number of characters to copy from src
- * @return A copy of a pointer to the destination string 
+ * @return A StrResult indicating success or failure (e.g., STR_OK, STR_NULL_PTR)
  * @note The string will be copied up till the null terminating byte or max character count `n`
+ * @note If the n character limit is reached before the end of src, the dest string will NOT have 
+ * a null terminating character. 
  */
-StrResult str_ncpy(char* dest, const char* src, int n);
+StrResult str_ncpy(char* dest, unsigned int dest_size, const char* src, unsigned int n);
 
 /**
  * @brief Concatenates a copy of the null terminated string pointed to by src to the end of the dest string
