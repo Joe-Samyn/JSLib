@@ -13,6 +13,23 @@
 
 #define STR_END '\0'
 
+typedef enum {
+    // String operation completed successfully 
+    STR_OK,
+    
+    // String operations resulted in a buffer overflow for one of the strings involved
+    STR_OVERFLOW,
+
+    // One of the string pointers involved in the string operation was null
+    STR_NULL_PTR,
+    
+    // One of the parameters involved in the string operation is invalid
+    STR_INVALID_OPERAND,
+    
+    // An unknown error occurred when trying to perform the string operation
+    STR_UKNOWN_ERR
+} StrResult;
+
 /**
  * @brief Computes the length of a string 
  * @param str Pointer to the string
@@ -27,7 +44,7 @@ int str_len(const char* str);
  * @param src The string to copy
  * @return A pointer to the copied string 
  */
-char* str_cpy(char* restrict dest, char* restrict src);
+char* str_cpy(char* dest, const char* src);
 
 /**
  * @brief Copies at most a count, n, of a null terminated string
@@ -37,7 +54,7 @@ char* str_cpy(char* restrict dest, char* restrict src);
  * @return A copy of a pointer to the destination string 
  * @note The string will be copied up till the null terminating byte or max character count `n`
  */
-char* str_ncpy(char* restrict dest, char* restrict src, int n);
+StrResult str_ncpy(char* dest, const char* src, int n);
 
 /**
  * @brief Concatenates a copy of the null terminated string pointed to by src to the end of the dest string
