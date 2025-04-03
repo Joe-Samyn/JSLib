@@ -1,12 +1,15 @@
 #include "jslib/string.h"
 
+static void fillWithTerm(char* str, unsigned int dest_size, unsigned int index);
 
-// TODO: We can create a safe_str_len function that takes a max length from the user
-int str_len(const char* str) {
+// TODO: 
+// - Convert all naming conventions to camelCase 
 
-    // TODO: Is there a way to do this more performantly with SIMD or 
-    // vectorized instructions?
+int strLen(const char* str) {
 
+    // TODO: 
+    //  - What if str is null?
+    
     int len = 0;
     char c = *str;
     while (c != '\0') {	
@@ -18,34 +21,47 @@ int str_len(const char* str) {
     return len;
 }
 
-// TODO: Need to add a parameter, size_t dest_size, so that we can confirm we do not
-// buffer overflow
-// TODO(joe): Ensure dest and src are not null
-// TODO(joe): Ensure dest ends with null terminating character
-// TODO(joe): Return proper StrResult for each scenario
-// TODO(joe): Copy dest pointer so dest pointer is not manipulated. Currently this
-// will leave dest pointer pointing to end of string
-char* str_cpy(char* dest, const char* src)  {
+StrResult strCpy(char* dest, unsigned int destSize, char* src)  {
 
-    // Loop over src using pointer arithmetic and copy characters into dest
-    // TODO: Could also benefit from SIMD or vectorized instructions 
-    char cursor = *src;
-    while (cursor != STR_END) {
-        *dest = cursor;
-
-        src++;
-        dest++;
-        cursor = *src;
+    // TODO: Edge cases to solve
+    //  - Dest could not be large enough to store all values of src
+    
+    if (!dest || !src)
+    {
+        return STR_NULL_PTR;
     }
+    
+    char* tempDest = dest;
+    char* tempSrc = src;
+    unsigned int index = 0;
+    while(index < destSize && *tempSrc != '\0')
+    {
+        *tempDest = *tempSrc;
+        tempDest++;
+        tempSrc++;
+        index++;
+    }
+    
+    if (index < destSize)
+    {
+        fillWithTerm(tempDest, destSize, index);
+        return STR_OK;
+    }
+    
+    if(*(tempDest - 1) != '\0')
+    {
+        return STR_MISSING_TERM;
+    }
+    
 
-    return dest;
+    return STR_OK;
 }
 
 
-StrResult str_ncpy(char* dest, unsigned int dest_size, const char* src, unsigned int max_chars) {
+StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int maxChars) {
     
     // Need to ensure there is room for a null terminating character
-    if (dest_size < max_chars + 1 || max_chars <= 0) {
+    if (destSize < maxChars + 1 || maxChars <= 0) {
         return STR_INVALID_OPERAND;
     }
 
@@ -54,33 +70,46 @@ StrResult str_ncpy(char* dest, unsigned int dest_size, const char* src, unsigned
     }
 
 
-    int num_chars = 0;
-    char* temp = dest;
-    while (*src != '\0' && num_chars < max_chars) {
+    unsigned int index = 0;
+    char* tempDest = dest;
+    char* tempSrc = src;
+    while (*tempSrc != '\0' && index < maxChars) {
 
-        *temp = *src;
+        *tempDest = *tempSrc;
 
-        temp++;
-        src++;
-        num_chars++;
+        tempDest++;
+        tempSrc++;
+        index++;
     }
-
-    // if num_chars < max_chars, fill dest with \0 until dest length == max_chars
-    // to ensure that dest ends with a null terminating character.
-    while(num_chars < max_chars) {
-        *temp = '\0';
-
-        temp++;
-        num_chars++;
-    }        
 
     // If the last string character is not a null terminator, raise a warning
     // This may be OK, as the caller could be writing into a preexisting buffer
     // that is null terminated. Return STR_MISSING_TERM so the caller can explicitly
     // decide what to do in this scenario
-    if (*(temp-1) != '\0') {
+    if (index < maxChars || index < destSize)
+    {
+        fillWithTerm(tempDest, destSize, index);        
+    }
+    else if (*(tempDest-1) != '\0') {
         return STR_MISSING_TERM;
     }
 
     return STR_OK;
+}
+
+/**
+ * @brief Fills the string with null terminating characters from index
+ * to max_char.
+ * @param str A pointer to the string to fill with null terminating characters
+ * @param str_size The length of the string pointed to by str
+ * @param index The index of str to start inserting null characters
+ */
+static void fillWithTerm(char* str, unsigned int dest_size, unsigned int index)
+{
+    char* temp = str;
+    for(int i = index; i < dest_size; i++)
+    {
+        *temp = '\0';
+        temp++;
+    }
 }

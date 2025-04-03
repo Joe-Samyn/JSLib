@@ -39,20 +39,21 @@ typedef enum {
  * @return Number of characters in the string (excluding null terminator)
  * @note The function assumes `str` is a valid, null terminated string.
  */
-int str_len(const char* str);
+int strLen(const char* str);
 
 /**
  * @brief Creates copy of a string
  * @param dest The destination to copy the string into 
+ * @param destSize The total length of the destination string
  * @param src The string to copy
  * @return A pointer to the copied string 
  */
-char* str_cpy(char* dest, const char* src);
+StrResult strCpy(char* dest, unsigned int destSize, char* src);
 
 /**
  * @brief Copies at most a count, n, of a null terminated string
  * @param dest A pointer to the destination buffer to copy to
- * @param dest_size The size of the dest in number of bytes, it must be at least larger than max_chars + 1 
+ * @param destSize The size of the dest in number of bytes, it must be at least larger than max_chars + 1 
  * @param src A pointer to the null terminated string to copy from 
  * @param n The maximum number of characters to copy from src
  * @return A StrResult indicating success or failure (e.g., STR_OK, STR_NULL_PTR)
@@ -60,7 +61,7 @@ char* str_cpy(char* dest, const char* src);
  * @note If the n character limit is reached before the end of src, the dest string will NOT have 
  * a null terminating character. 
  */
-StrResult str_ncpy(char* dest, unsigned int dest_size, const char* src, unsigned int n);
+StrResult strNCpy(char* dest, unsigned int destSize, char* src, unsigned int n);
 
 /**
  * @brief Concatenates a copy of the null terminated string pointed to by src to the end of the dest string
@@ -68,7 +69,7 @@ StrResult str_ncpy(char* dest, unsigned int dest_size, const char* src, unsigned
  * @param src A pointer to the null terminated string to copy from 
  * @param A pointer to dest that includes the appended copy of src
  */
-char* str_cat(char* restrict dest, char* restrict src);
+char* strCat(char* restrict dest, char* restrict src);
 
 /**
  * @brief Compares two null terminated strings lexagraphically 
@@ -76,7 +77,7 @@ char* str_cat(char* restrict dest, char* restrict src);
  * @param rhs Pointer to second null terminated string to compare
  * @returns 0 if strings are equal, negative value if lhs is greater than rhs, and positive value if rhs is greater than lhs
  */
-int str_cmp(char* lhs, char* rhs);
+int strCmp(char* lhs, char* rhs);
 
 /**
  * @brief Lexagraphically compares the first n characters of two null terminated strings
@@ -85,7 +86,7 @@ int str_cmp(char* lhs, char* rhs);
  * @param n The max number of characters to compare 
  * @returns 0 if strings are equal, negative value if lhs is greater than rhs, and positive value if rhs is greater than lhs
  */
-int str_ncmp(char* lhs, char* rhs, int n);
+int strNCmp(char* lhs, char* rhs, int n);
 #endif
 
 
