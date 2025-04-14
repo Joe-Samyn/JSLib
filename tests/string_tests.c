@@ -3,13 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
  
-
- static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
+/****************
+ * strLen Tests *
+ ****************/
+static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
 
 	char* test_str = "Hello, world!\0";
 	int exp = 13;
 
-	int result = str_len(test_str);
+	int result = strLen(test_str);
 
 	munit_assert_int(result, ==, exp);
 	
@@ -26,14 +28,17 @@ static MunitResult test_str_len_long_string(const MunitParameter params[], void*
 	
 	// Excluding null terminator, length is 999
 	int exp = 999;
-	int result = str_len(str);
+	int result = strLen(str);
 
 	munit_assert_int(result, ==, exp);
 	return MUNIT_OK;
 }
 
-
-static MunitResult test_str_cpy(const MunitParameter params[], void* fixture) {
+/****************
+ * strCpy Tests *
+ ****************/
+// Happy path
+static MunitResult test_strCpy_success(const MunitParameter params[], void* fixture) {
 	
 	// TODO: Needs to be changed to use this libraries memory allocation 
 	char* src = "Hello!";
@@ -46,6 +51,47 @@ static MunitResult test_str_cpy(const MunitParameter params[], void* fixture) {
 	return MUNIT_OK;	
 }
 
+// dest* is null
+static MunitResult test_strCpy_destIsNull(const MunitParameter params[], void* fixture) {
+
+    char* src = "Hello!";
+    char* dest = NULL;
+
+    StrResult result = strCpy(dest, 0, src); 
+    
+    munit_assert_int(result, ==, STR_NULL_PTR);
+    
+    return MUNIT_OK;
+}
+
+// src* is null
+static MunitResult test_strCpy_srcIsNull(const MunitParameter params[], void* fixture) 
+{
+    char* src = NULL;
+    char* dest = (char*)malloc(sizeof(char) * 1);
+
+    StrResult result = strCpy(dest, 0, src);
+
+    munit_assert_int(result, ==, STR_NULL_PTR);
+    return MUNIT_OK;
+
+}
+
+// src size < dest size and fills dest with terminating 0
+static MunitResult test_strCpy_srcSizeLessDestSize(const MunitParameter params[], void* fixture)
+{
+    return MUNIT_OK;
+}
+
+// src size > dest size and dest has no terminating character
+static MunitResult test_strCpy_srcSizeMoreDestSize(const MunitParameter params[], void* fixture)
+{
+    return MUNIT_OK;
+}
+
+/*****************
+ * strNCpy Tests *
+ *****************/
 MunitResult test_str_ncpy_n_less_than_length(const MunitParameter params[], void* fixture) {
 	// TODO: Needs to be changed to use library memory allocator
 	char src[] = "Hello";
@@ -80,8 +126,24 @@ static MunitTest tests[] = {
 		NULL
 	},
 	{
-		"/test-str-cpy",
-		test_str_cpy,
+		"/test-strCpy-success",
+		test_strCpy_success,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+    {
+		"/test-strCpy-srcNull",
+		test_strCpy_srcIsNull,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+    {
+		"/test-strCpy-destIsNull",
+		test_strCpy_destIsNull,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,

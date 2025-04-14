@@ -25,6 +25,8 @@ StrResult strCpy(char* dest, unsigned int destSize, char* src)  {
 
     // TODO: Edge cases to solve
     //  - Dest could not be large enough to store all values of src
+
+    // TODO: What if destSize == 0?
     
     if (!dest || !src)
     {
