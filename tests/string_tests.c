@@ -42,9 +42,10 @@ static MunitResult test_strCpy_success(const MunitParameter params[], void* fixt
 	
 	// TODO: Needs to be changed to use this libraries memory allocation 
 	char* src = "Hello!";
-	char* dest = (char*)malloc(sizeof(char) * (str_len(src) + 1));
-	
-	str_cpy(dest, src);
+	char* dest = (char*)malloc(sizeof(char) * (strLen(src) + 1));
+    int destSize = 5;
+
+	strCpy(dest, destSize, src);
 
 	munit_assert_string_equal(dest, src);
 
@@ -80,6 +81,16 @@ static MunitResult test_strCpy_srcIsNull(const MunitParameter params[], void* fi
 // src size < dest size and fills dest with terminating 0
 static MunitResult test_strCpy_srcSizeLessDestSize(const MunitParameter params[], void* fixture)
 {
+    char* src = "he";
+    int destSize = 4;
+    char dest[destSize];
+
+    StrResult result = strCpy(dest, destSize, src);
+    
+    munit_assert_int(dest[3], ==, '\0');
+    munit_assert_int(dest[2], ==, '\0');
+    munit_assert_int(result, ==, STR_OK);
+
     return MUNIT_OK;
 }
 
@@ -92,19 +103,7 @@ static MunitResult test_strCpy_srcSizeMoreDestSize(const MunitParameter params[]
 /*****************
  * strNCpy Tests *
  *****************/
-MunitResult test_str_ncpy_n_less_than_length(const MunitParameter params[], void* fixture) {
-	// TODO: Needs to be changed to use library memory allocator
-	char src[] = "Hello";
-	char* dest = (char*)malloc(sizeof(char) * 3);
-	
-	char* exp = "Hel";
 
-	str_ncpy(dest, src, 3);
-
-	munit_assert_string_equal(dest, exp);
-
-	return MUNIT_OK;
-}
 
 
 /* Define Test Suite */
@@ -144,14 +143,6 @@ static MunitTest tests[] = {
     {
 		"/test-strCpy-destIsNull",
 		test_strCpy_destIsNull,
-		NULL,
-		NULL,
-		MUNIT_TEST_OPTION_NONE,
-		NULL
-	},
-	{
-		"/test-str-ncpy-n-less-than-length",
-		test_str_ncpy_n_less_than_length,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,
