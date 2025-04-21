@@ -8,8 +8,11 @@ static void fillWithTerm(char* str, unsigned int dest_size, unsigned int index);
 int strLen(const char* str) {
 
     // TODO: 
-    //  - What if str is null?
-    
+    //  - handle str == NULL
+    //  - add maxLen parameter as a safety to protect against buffer overflow
+    //  - consider switching to do{} while instead, more alined with assembly 
+    //  - use copy of pointer for iterating 
+
     int len = 0;
     char c = *str;
     while (c != '\0') {	
@@ -62,7 +65,7 @@ StrResult strCpy(char* dest, unsigned int destSize, char* src)  {
 
 StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int maxChars) {
     
-    // Need to ensure there is room for a null terminating character
+    // Need to ensure destSize is at least as long as maxChars 
     if (destSize < maxChars + 1 || maxChars <= 0) {
         return STR_INVALID_OPERAND;
     }
@@ -90,7 +93,7 @@ StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int ma
     // decide what to do in this scenario
     if (index < maxChars || index < destSize)
     {
-        fillWithTerm(tempDest, destSize, index);        
+        fillWithTerm(tempDest, maxChars, index);        
     }
     else if (*(tempDest-1) != '\0') {
         return STR_MISSING_TERM;
@@ -103,10 +106,10 @@ StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int ma
  * @brief Fills the string with null terminating characters from index
  * to max_char.
  * @param str A pointer to the string to fill with null terminating characters
- * @param str_size The length of the string pointed to by str
+ * @param strSize The length of the string pointed to by str
  * @param index The index of str to start inserting null characters
  */
-static void fillWithTerm(char* str, unsigned int dest_size, unsigned int index)
+static void fillWithTerm(char* str, unsigned int strSize, unsigned int index)
 {
     char* temp = str;
     for(int i = index; i < dest_size; i++)

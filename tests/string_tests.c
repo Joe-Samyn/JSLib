@@ -6,6 +6,15 @@
 /****************
  * strLen Tests *
  ****************/
+
+// Success case, str is not null & contains null terminating character
+
+// str == NULL
+
+// str has no null terminating and reaches max length
+
+// maxLength = NULL
+
 static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
 
 	char* test_str = "Hello, world!\0";
@@ -113,8 +122,21 @@ static MunitResult test_strCpy_srcSizeMoreDestSize(const MunitParameter params[]
 /*****************
  * strNCpy Tests *
  *****************/
+// Case 1: Success path, dest is not null, destSize == maxChars == lenth of src + 1, returns STR_OK
 
+// Case 2: destSize < maxChars
 
+// Case 3: maxChars < 0
+
+// Case 4: maxChars == 0
+
+// Case 5: dest == NULL
+
+// Case 6: src == NULL
+
+// Case 7: destSize == maxChars but both less than length of source, should result in no null term 
+
+// Case 8: destSize == maxChars but both > length of src, fills dest with null term until maxChars is reached 
 
 /* Define Test Suite */
 static MunitTest tests[] = {
