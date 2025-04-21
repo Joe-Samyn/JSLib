@@ -41,9 +41,9 @@ static MunitResult test_str_len_long_string(const MunitParameter params[], void*
 static MunitResult test_strCpy_success(const MunitParameter params[], void* fixture) {
 	
 	// TODO: Needs to be changed to use this libraries memory allocation 
-	char* src = "Hello!";
-	char* dest = (char*)malloc(sizeof(char) * (strLen(src) + 1));
-    int destSize = 5;
+	char src[] = "Hello!";
+	int destSize = strLen(src);
+    char dest[destSize];
 
 	strCpy(dest, destSize, src);
 
@@ -55,7 +55,7 @@ static MunitResult test_strCpy_success(const MunitParameter params[], void* fixt
 // dest* is null
 static MunitResult test_strCpy_destIsNull(const MunitParameter params[], void* fixture) {
 
-    char* src = "Hello!";
+    char src[] = "Hello!";
     char* dest = NULL;
 
     StrResult result = strCpy(dest, 0, src); 
@@ -69,7 +69,8 @@ static MunitResult test_strCpy_destIsNull(const MunitParameter params[], void* f
 static MunitResult test_strCpy_srcIsNull(const MunitParameter params[], void* fixture) 
 {
     char* src = NULL;
-    char* dest = (char*)malloc(sizeof(char) * 1);
+    char destSize = 1;
+    char dest[destSize];
 
     StrResult result = strCpy(dest, 0, src);
 
@@ -97,6 +98,15 @@ static MunitResult test_strCpy_srcSizeLessDestSize(const MunitParameter params[]
 // src size > dest size and dest has no terminating character
 static MunitResult test_strCpy_srcSizeMoreDestSize(const MunitParameter params[], void* fixture)
 {
+    char src[] = "Hello!";
+    char destSize = 3;
+    char dest[destSize];
+
+    StrResult result = strCpy(dest, destSize, src);
+
+    munit_assert_int(dest[destSize - 1], ==, 'l');
+    munit_assert_int(result, ==, STR_MISSING_TERM);
+
     return MUNIT_OK;
 }
 
@@ -143,6 +153,22 @@ static MunitTest tests[] = {
     {
 		"/test-strCpy-destIsNull",
 		test_strCpy_destIsNull,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+    {
+		"/test-strCpy-srcSizeLessDestSize",
+		test_strCpy_srcSizeLessDestSize,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+    {
+		"/test-strCpy-srcSizeMoreDestSize",
+		test_strCpy_srcSizeMoreDestSize,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,
