@@ -24,6 +24,7 @@ int strLen(const char* str) {
     return len;
 }
 
+// TODO: src should be const char to signify readonly intent
 StrResult strCpy(char* dest, unsigned int destSize, char* src)  {
 
     // TODO: Edge cases to solve
@@ -62,10 +63,12 @@ StrResult strCpy(char* dest, unsigned int destSize, char* src)  {
     return STR_OK;
 }
 
-
+// TODO: src should be const char to signify readonly intent
 StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int maxChars) {
     
-    // Need to ensure destSize is at least as long as maxChars 
+    // TODO: destSize should be >= maxChars NOT maxChars + 1 b/c there may not be a
+    // null terminating character 
+    // TODO: No need to check for maxChars <= 0. It doesn't matter if 0, just treat as no-op
     if (destSize < maxChars + 1 || maxChars <= 0) {
         return STR_INVALID_OPERAND;
     }
@@ -93,7 +96,7 @@ StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int ma
     // decide what to do in this scenario
     if (index < maxChars || index < destSize)
     {
-        fillWithTerm(tempDest, maxChars, index);        
+        fillWithTerm(tempDest, destSize, index);        
     }
     else if (*(tempDest-1) != '\0') {
         return STR_MISSING_TERM;
@@ -109,10 +112,10 @@ StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int ma
  * @param strSize The length of the string pointed to by str
  * @param index The index of str to start inserting null characters
  */
-static void fillWithTerm(char* str, unsigned int strSize, unsigned int index)
+static void fillWithTerm(const char* str, unsigned int strSize, unsigned int index)
 {
     char* temp = str;
-    for(int i = index; i < dest_size; i++)
+    for(int i = index; i < strSize i++)
     {
         *temp = '\0';
         temp++;
