@@ -20,7 +20,7 @@ static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
 	char* test_str = "Hello, world!\0";
 	int exp = 13;
 
-	int result = strLen(test_str);
+	int result = strLen(test_str, 20);
 
 	munit_assert_int(result, ==, exp);
 	
@@ -37,7 +37,7 @@ static MunitResult test_str_len_long_string(const MunitParameter params[], void*
 	
 	// Excluding null terminator, length is 999
 	int exp = 999;
-	int result = strLen(str);
+	int result = strLen(str, 20);
 
 	munit_assert_int(result, ==, exp);
 	return MUNIT_OK;
@@ -51,7 +51,7 @@ static MunitResult test_strCpy_success(const MunitParameter params[], void* fixt
 	
 	// TODO: Needs to be changed to use this libraries memory allocation 
 	char src[] = "Hello!";
-	int destSize = strLen(src);
+	int destSize = strLen(src, 20);
     char dest[destSize];
 
 	strCpy(dest, destSize, src);

@@ -36,10 +36,12 @@ typedef enum {
 /**
  * @brief Computes the length of a string 
  * @param str Pointer to the string
+ * @param maxLength Maximum number of characters to count. This is used as a protection
+ * against nonnull terminating strings
  * @return Number of characters in the string (excluding null terminator)
  * @note The function assumes `str` is a valid, null terminated string.
  */
-int strLen(const char* str);
+int strLen(const char* str, int maxLength);
 
 /**
  * @brief Creates copy of a string
@@ -48,7 +50,7 @@ int strLen(const char* str);
  * @param src The string to copy
  * @return A pointer to the copied string 
  */
-StrResult strCpy(char* dest, unsigned int destSize, char* src);
+StrResult strCpy(char* dest, unsigned int destSize, const char* src);
 
 /**
  * @brief Copies at most a count, n, of a null terminated string
@@ -61,7 +63,7 @@ StrResult strCpy(char* dest, unsigned int destSize, char* src);
  * @note If the n character limit is reached before the end of src, the dest string will NOT have 
  * a null terminating character. 
  */
-StrResult strNCpy(char* dest, unsigned int destSize, char* src, unsigned int n);
+StrResult strNCpy(char* dest, unsigned int destSize, const char* src, unsigned int n);
 
 /**
  * @brief Concatenates a copy of the null terminated string pointed to by src to the end of the dest string

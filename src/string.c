@@ -2,36 +2,25 @@
 
 static void fillWithTerm(char* str, unsigned int dest_size, unsigned int index);
 
-// TODO: 
-// - Convert all naming conventions to camelCase 
-
-int strLen(const char* str) {
-
-    // TODO: 
-    //  - handle str == NULL
-    //  - add maxLen parameter as a safety to protect against buffer overflow
-    //  - consider switching to do{} while instead, more alined with assembly 
-    //  - use copy of pointer for iterating 
+int strLen(const char* str, int maxLength) {
+ 
+    if (str == NULL) {
+        return STR_INVALID_OPERAND;
+    }
 
     int len = 0;
-    char c = *str;
-    while (c != '\0') {	
+    char* temp = str;
+
+    while (*temp != '\0' && len < maxLength) {	
         len++;
-        str++;
-        c = *str;
+        temp++;
     }
 
     return len;
 }
 
-// TODO: src should be const char to signify readonly intent
-StrResult strCpy(char* dest, unsigned int destSize, char* src)  {
+StrResult strCpy(char* dest, unsigned int destSize, const char* src)  {
 
-    // TODO: Edge cases to solve
-    //  - Dest could not be large enough to store all values of src
-
-    // TODO: What if destSize == 0?
-    
     if (!dest || !src)
     {
         return STR_NULL_PTR;
@@ -63,13 +52,9 @@ StrResult strCpy(char* dest, unsigned int destSize, char* src)  {
     return STR_OK;
 }
 
-// TODO: src should be const char to signify readonly intent
-StrResult str_ncpy(char* dest, unsigned int destSize, char* src, unsigned int maxChars) {
+StrResult str_ncpy(char* dest, unsigned int destSize, const char* src, unsigned int maxChars) {
     
-    // TODO: destSize should be >= maxChars NOT maxChars + 1 b/c there may not be a
-    // null terminating character 
-    // TODO: No need to check for maxChars <= 0. It doesn't matter if 0, just treat as no-op
-    if (destSize < maxChars + 1 || maxChars <= 0) {
+    if (destSize < maxChars) {
         return STR_INVALID_OPERAND;
     }
 
