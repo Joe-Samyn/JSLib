@@ -7,41 +7,57 @@
  * strLen Tests *
  ****************/
 
-// Success case, str is not null & contains null terminating character
-
 // str == NULL
+static MunitResult test_strLen_strNull(const MunitParameter params[], void* fixture) {
+    char* str = 0;
+    
+    StrResult exp = STR_INVALID_OPERAND;
 
+    StrResult result = strLen(str, 20);
+
+    munit_assert_int(result, ==, exp);
+
+    return MUNIT_OK;
+}
 // str has no null terminating and reaches max length
+static MunitResult test_strLen_noTerminatingChar_hitsMaxLength(const MunitParameter params[], void* fixture) {
+    char str[5] = { 'H', 'E', 'L', 'L', 'O' };
+    StrResult exp = STR_MISSING_TERM;
+
+    StrResult result = strLen(str, 8);
+
+    munit_assert_int(result, ==, exp);
+
+    return MUNIT_OK;
+}
+
 
 // maxLength = NULL
+static MunitResult test_strLen_maxLengthZero(const MunitParameter params[], void* fixture) {
 
-static MunitResult test_str_len(const MunitParameter params[], void* fixture) {
+    char str[] = "Hello!";
+    StrResult exp = STR_INVALID_OPERAND;
+
+    StrResult result = strLen(str, 0);
+
+    munit_assert_int(result, ==, exp);
+
+    return MUNIT_OK;
+}
+
+// Success 
+static MunitResult test_strLen_success(const MunitParameter params[], void* fixture) {
 
 	char* test_str = "Hello, world!\0";
 	int exp = 13;
 
-	int result = strLen(test_str, 20);
+	StrResult result = strLen(test_str, 20);
 
 	munit_assert_int(result, ==, exp);
 	
 	return MUNIT_OK;
 }
 
-static MunitResult test_str_len_long_string(const MunitParameter params[], void* fixture) {
-	char str[1000];
-	for (int i = 0; i < 999; i++) {
-		str[i] = 'c';
-	}
-
-	str[999] = '\0';
-	
-	// Excluding null terminator, length is 999
-	int exp = 999;
-	int result = strLen(str, 20);
-
-	munit_assert_int(result, ==, exp);
-	return MUNIT_OK;
-}
 
 /****************
  * strCpy Tests *
@@ -141,16 +157,33 @@ static MunitResult test_strCpy_srcSizeMoreDestSize(const MunitParameter params[]
 /* Define Test Suite */
 static MunitTest tests[] = {
 	{
-		"/test-str-len",
-		test_str_len,
+		"/test-strLen-success",
+		test_strLen_success,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,
 		NULL
 	},
-	{
-		"/test-str-len-long-string",
-		test_str_len_long_string,
+    {
+		"/test-strLen-maxLengthZero",
+		test_strLen_maxLengthZero,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+
+    {
+		"/test-strLen-noTerminatingChar-hitsMaxLength",
+		test_strLen_noTerminatingChar_hitsMaxLength,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+    {
+		"/test-strLen-strNull",
+		test_strLen_strNull,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,
