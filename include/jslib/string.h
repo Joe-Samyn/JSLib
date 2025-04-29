@@ -66,14 +66,6 @@ StrResult strCpy(char* dest, unsigned int destSize, const char* src);
 StrResult strNCpy(char* dest, unsigned int destSize, const char* src, unsigned int n);
 
 /**
- * @brief Concatenates a copy of the null terminated string pointed to by src to the end of the dest string
- * @param dest A pointer to the null terminated string to append to 
- * @param src A pointer to the null terminated string to copy from 
- * @param A pointer to dest that includes the appended copy of src
- */
-char* strCat(char* restrict dest, char* restrict src);
-
-/**
  * @brief Compares two null terminated strings lexagraphically 
  * @param lhs Pointer to first null terminated string to compare
  * @param rhs Pointer to second null terminated string to compare
