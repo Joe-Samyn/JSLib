@@ -1,10 +1,27 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <stdlib.h>
+
 /**
  * This file contains all memory related operations such as copying memory, allocating memory,
  * duplicating memory, freeing memory, etc. 
  */
+
+typedef struct Metadata {
+    /**
+     * Pointer to the next block of memory
+     */
+    struct Metadata* next;
+    /**
+     * Size of the memory region 
+     */
+    int size;
+    /**
+     * Flag indicating if memory is free or in use
+     */
+    int free;
+};
 
 /**
  * Copies data from a source memory region into destination memory region
@@ -31,7 +48,15 @@ void* memcpy(void* dest, const void* src, size_t n);
  */
 void* memset(void* dest, unsigned char value, size_t n);
 
-void alloc();
+/**
+ * Allocate size bytes of uninitialized memory 
+ * 
+ * If size is zero, a null pointer will be returned.
+ * TODO: This current implementation is NOT thread safe. 
+ * 
+ * @param 
+ */
+void alloc(size_t size);
 
 void dealloc();
 
