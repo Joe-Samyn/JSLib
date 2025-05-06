@@ -3,6 +3,15 @@
 
 #include <stdlib.h>
 
+// Size of the metadata block
+#define METADATA_SIZE sizeof(Metadata)
+
+/** 
+ * Number of bytes to align to when requesting memory from OS
+ * TODO: This should be looked at further b/c not every machine will align to 8 bytes 
+*/
+#define ALIGNMENT 8 
+
 /**
  * This file contains all memory related operations such as copying memory, allocating memory,
  * duplicating memory, freeing memory, etc. 
@@ -16,7 +25,7 @@ typedef struct Metadata {
     /**
      * Size of the memory region 
      */
-    int size;
+    size_t size;
     /**
      * Flag indicating if memory is free or in use
      */
@@ -52,11 +61,12 @@ void* memset(void* dest, unsigned char value, size_t n);
  * Allocate size bytes of uninitialized memory 
  * 
  * If size is zero, a null pointer will be returned.
- * TODO: This current implementation is NOT thread safe. 
+ * TODO: This current implementation is NOT thread safe.
+ * TODO: This implementation will only work on Linux, it needs to be ported to MacOS and Windows 
  * 
  * @param 
  */
-void alloc(size_t size);
+void* alloc(size_t size);
 
 void dealloc();
 
