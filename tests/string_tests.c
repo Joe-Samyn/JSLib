@@ -233,7 +233,7 @@ static MunitTest tests[] = {
 	{ NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
 };
 
-const MunitSuite string_suite = {
+const MunitSuite stringSuite = {
 	"/string-tests",
 	tests,
 	NULL,

@@ -2,6 +2,7 @@
 #define MEMORY_H
 
 #include <stdlib.h>
+#include <stddef.h>
 
 // Size of the metadata block
 #define METADATA_SIZE sizeof(Metadata)
@@ -23,20 +24,22 @@
  * duplicating memory, freeing memory, etc. 
  */
 
-typedef struct Metadata {
+typedef struct {
     /**
      * Pointer to the next block of memory
      */
     struct Metadata* next;
     /**
-     * Size of the memory region 
+     * Size in bytes of the memory region 
      */
     size_t size;
     /**
      * Flag indicating if memory is free or in use
      */
     int free;
-};
+} Metadata;
+
+
 
 /**
  * Copies data from a source memory region into destination memory region
@@ -49,7 +52,7 @@ typedef struct Metadata {
  * @param n The number of bytes to copy from src into dest
  * @return A pointer to dest where data was copied.
  */
-void* memcpy(void* dest, const void* src, size_t n);
+void* memoryCopy(void* dest, const void* src, size_t n);
 
 /**
  * Sets n bytes of the block of memory pointed to by dest to the specified value
@@ -61,7 +64,7 @@ void* memcpy(void* dest, const void* src, size_t n);
  * @param n The number of bytes to set 
  * @return dest
  */
-void* memset(void* dest, unsigned char value, size_t n);
+void* memorySet(void* dest, unsigned char value, size_t n);
 
 /**
  * Allocate size bytes of uninitialized memory 
@@ -72,8 +75,8 @@ void* memset(void* dest, unsigned char value, size_t n);
  * 
  * @param 
  */
-void* alloc(size_t size);
+void* allocMemory(size_t size);
 
-void dealloc();
+void deallocMemory();
 
 #endif

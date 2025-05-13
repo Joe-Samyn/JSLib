@@ -2,13 +2,15 @@
 #include <stdio.h>
 
 
-extern const MunitSuite string_suite;
+extern const MunitSuite stringSuite;
+extern const MunitSuite memorySuite;
 
 
 int main(int argc, char* argv[]) {
 	
 	MunitSuite suites[] = {
-		string_suite,
+		stringSuite,
+		memorySuite,
 		{ NULL, NULL, NULL, 0, MUNIT_SUITE_OPTION_NONE }  // Sentinel entry
 	};
 
