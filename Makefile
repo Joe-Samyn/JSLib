@@ -28,9 +28,12 @@ SRC_FILES := ${SRC_DIR}/string.c \
 			${SRC_DIR}/memory_macos.c
 
 TEST_FILES := ${TESTS_DIR}/string_tests.c \
-		  ${TESTS_DIR}/memory_tests.c \
+		  ${TESTS_DIR}/memory_macos_tests.c \
 	      ${TESTS_DIR}/munit.c \
 	      ${TESTS_DIR}/test_runner.c
+
+FILE := 
+OUT := 
 
 # Determin flags for compiler based on above variables
 ifeq (${BUILD}, debug)
@@ -42,6 +45,7 @@ endif
 
 OBJ_FILES := $(patsubst ${SRC_DIR}/%.c, ${BUILD_DIR}/${SRC_DIR}/%.o, ${SRC_FILES})
 TEST_OBJ_FILES := $(patsubst ${TESTS_DIR}/%.c, ${BUILD_DIR}/${TESTS_DIR}/%.o, ${TEST_FILES})
+ASM_FILES := $(patsubst ${SRC_DIR}/%.c, ${BUILD_DIR}/%.s, ${SRC_FILES})
 
 # Build library  
 all: ${TARGET}
@@ -77,6 +81,12 @@ ${BUILD_DIR}/${TESTS_DIR}/%.o: ${TESTS_DIR}/%.c
 # Run tests
 tests_run: 
 	./${TEST_TARGET}
+
+
+assemble: ${ASM_FILES}
+
+${BUILD_DIR}/%.s: ${SRC_DIR}/%.c
+	${GCC} -O0 -fno-builtin -ffreestanding ${INCLUDES} -S $< -o $@
 	
 
 clean:

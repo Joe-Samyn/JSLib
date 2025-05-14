@@ -24,7 +24,7 @@
  * duplicating memory, freeing memory, etc. 
  */
 
-typedef struct {
+typedef struct Metadata {
     /**
      * Pointer to the next block of memory
      */
