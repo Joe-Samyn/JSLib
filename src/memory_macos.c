@@ -1,9 +1,11 @@
 #include "jslib/memory.h"
 #include <sys/mman.h>
 #include <errno.h>
+#include <assert.h>
 
 /**
  * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
+ * TODO: Write unit tests for 
  */
 
 // Size of the metadata block
@@ -59,12 +61,29 @@ static Metadata* search(size_t size);
  */
 void* allocMemory(size_t size) {
 
-    // 1. Determine the proper size to allocate
-    int memorySize = size + sizeof(Metadata);
-    int alignedSize = align(memorySize);
+    if (size < 1) {
+        return NULL;
+    }
 
-    // 2. Create Block
-    void* memory = mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    // 1. Determine the proper size to allocate by aligning size to ALIGNMENT boundaries 
+    /**
+     * TODO: What happens if memorySize is too large? 
+     */
+    size_t alignedSize = align(size);
+    assert(sizeof(Metadata) % ALIGNMENT == 0);
+    size_t memorySize = alignedSize + sizeof(Metadata);
+
+    // 2. Search for open block or Create Block
+    
+    // 2a. Search 
+
+    // 2b. Split needed? 
+
+    // 2c. Allocate new memory region
+    void* memory = mmap(NULL, memorySize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    /**
+     * TODO: Handle more error scenarios
+     */
     if (memory == MAP_FAILED) 
     {
         if (errno == EINVAL)
@@ -74,12 +93,15 @@ void* allocMemory(size_t size) {
     } 
 
     // 3. Create Metadata
+    /**
+     * TODO: Add block into memory block list
+     */
     Metadata* metadata = (Metadata*)memory;
-    metadata->size = size;
+    metadata->size = alignedSize;
     metadata->next = NULL;
     metadata->free = 0;
 
-    // 4. Allocate memory
+    // 4. Return allocated memory block
     return metadata + 1;
 }
 
