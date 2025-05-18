@@ -4,42 +4,15 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-// Size of the metadata block
-#define METADATA_SIZE sizeof(Metadata)
+/** 
+    TODO: Add errorCode property that is set when error occurs. Maybe make it a queue and pop the most recent error code off the queue? 
+*/
 
 /** 
  * Number of bytes to align to when requesting memory from OS
  * TODO: This should be looked at further b/c not every machine will align to 8 bytes 
 */
 #define ALIGNMENT 8
-
-/**
- * Aligns a number x to the next multiple of ALIGNMENT. Used to round up and get the 
- * largest memory size that is a multiple of ALIGNMENT needed to store the data.
- */
-#define align(x) ((x + (ALIGNMENT - 1) & ~(ALIGNMENT - 1)))
-
-/**
- * This file contains all memory related operations such as copying memory, allocating memory,
- * duplicating memory, freeing memory, etc. 
- */
-
-typedef struct Metadata {
-    /**
-     * Pointer to the next block of memory
-     */
-    struct Metadata* next;
-    /**
-     * Size in bytes of the memory region 
-     */
-    size_t size;
-    /**
-     * Flag indicating if memory is free or in use
-     */
-    int free;
-} Metadata;
-
-
 
 /**
  * Copies data from a source memory region into destination memory region
@@ -67,13 +40,18 @@ void* memoryCopy(void* dest, const void* src, size_t n);
 void* memorySet(void* dest, unsigned char value, size_t n);
 
 /**
- * Allocate size bytes of uninitialized memory 
+ * Allocate a block of memory that is at least `size` in bytes. Memory is uninitialized on allocation.
+ * Memory returned is always aligned to the largest type on the platform. The alignment is determined
+ * by the ALIGNMENT macro. 
  * 
- * If size is zero, a null pointer will be returned.
  * TODO: This current implementation is NOT thread safe.
- * TODO: This implementation will only work on Linux, it needs to be ported to MacOS and Windows 
+ * TODO: This implementation will only work on OSX, it needs to be ported to Linux and Windows 
  * 
- * @param 
+ * @param size The size in bytes of the required memory region. Size must be greater than 0. If
+ * 0 is provided, a NULL pointer is returned. 
+ * @return A pointer to the allocated memory block matching the size requirement. The returned 
+ * block will be greater than or equal to the requested size. A NULL pointer is returned on 
+ * failure to allocate memory. 
  */
 void* allocMemory(size_t size);
 
