@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <unistd.h>
 
 /** 
     TODO: Add errorCode property that is set when error occurs. Maybe make it a queue and pop the most recent error code off the queue? 
@@ -12,7 +13,7 @@
  * Number of bytes to align to when requesting memory from OS
  * TODO: This should be looked at further b/c not every machine will align to 8 bytes 
 */
-#define ALIGNMENT 8
+#define ALIGNMENT sysconf(_SC_PAGE_SIZE)
 
 /**
  * Copies data from a source memory region into destination memory region

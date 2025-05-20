@@ -52,7 +52,59 @@ static Metadata* data = NULL;
  * @return A pointer to the start of the memory block satisfies the size criteria. If a memory block that matches the size criteria
  * cannot be found, NULL is returned. 
  */
-static Metadata* search(size_t size);
+/**
+ * TODO: This is a naive implementation and can be improved
+ */
+static Metadata* search(size_t size) {
+
+    if (size < 1) {
+        return NULL;
+    }
+
+    Metadata* block = NULL;
+    Metadata* temp = data;
+    int bestFit = INT32_MAX;
+    while(temp != NULL) {
+
+        // Check for free blocks that match criteria
+        if (temp->free && temp->size >= size) {
+            int delta = temp->size - size;
+
+            // We found a block that is a better fit
+            if (bestFit > delta) {
+                block = temp;
+            }
+        }
+
+        temp = temp->next;
+    }
+
+    return block;
+}
+
+/**
+ * Inserts a block of memory into the memory block list. 
+ * 
+ * The block of memory is always inserted at the end of the linked list. 
+ * TODO: Not optimal and should be improved. 
+ * 
+ * @param block The block of memory to insert. Parameter cannot be NULL. If parameter is NULL, -1 is returned from function. 
+ * @return 0 if insertion was successful. If insertion failed, a value less than 0 is returned. 
+ */
+static int insertBlock(Metadata* block) {
+
+    if (block == NULL) return -1;
+
+    Metadata* temp = data;
+
+    while (temp!= NULL) {
+        temp = temp->next;
+    }
+
+    temp = block;
+
+    return 0;
+}
 
 /**
  * TODO:
@@ -81,14 +133,21 @@ void* allocMemory(size_t size) {
 
     // 2c. Allocate new memory region
     void* memory = mmap(NULL, memorySize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-    /**
-     * TODO: Handle more error scenarios
-     */
     if (memory == MAP_FAILED) 
     {
-        if (errno == EINVAL)
-        {
-           return NULL;
+        switch(errno) {
+            case EINVAL: // len not greater than 0
+            {
+
+            } break;
+            case EMFILE: // limit on mapped regions per process is exceeded
+            {
+
+            } break;
+            case ENOMEM: // insufficient memory available 
+            {
+
+            } break;
         }
     } 
 
@@ -101,34 +160,8 @@ void* allocMemory(size_t size) {
     metadata->next = NULL;
     metadata->free = 0;
 
+    insertBlock(metadata);
+
     // 4. Return allocated memory block
     return metadata + 1;
-}
-
-/**
- * TODO: This is a naive implementation and can be improved
- */
-static Metadata* search(size_t size) {
-
-    if (size < 1) {
-        return NULL;
-    }
-
-    Metadata* block = NULL;
-    Metadata* temp = data;
-    int bestFit = INT32_MAX;
-    while(temp != NULL) {
-
-        // Check for free blocks that match criteria
-        if (temp->free && temp->size >= size) {
-            int delta = temp->size - size;
-
-            // We found a block that is a better fit
-            if (bestFit > delta) {
-                block = temp;
-            }
-        }
-
-        temp = temp->next;
-    }
 }
