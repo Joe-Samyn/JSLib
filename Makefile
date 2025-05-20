@@ -10,7 +10,7 @@ GCC := gcc
 AR := ar
 
 # Compiler Flags
-INCLUDES := -Iinclude
+INCLUDES := -Iinclude -Isrc
 LIBS := -ljslib
 BUILD ?= debug
 

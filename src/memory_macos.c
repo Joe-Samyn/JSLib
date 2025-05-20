@@ -3,44 +3,11 @@
 #include <errno.h>
 #include <assert.h>
 
+#include "memory_internal.h"
+
 /**
  * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
- * TODO: Write unit tests for 
  */
-
-// Size of the metadata block
-#define METADATA_SIZE sizeof(Metadata)
-
-/**
- * Aligns a number x to the next multiple of ALIGNMENT. Used to round up and get the 
- * largest memory size that is a multiple of ALIGNMENT needed to store the data.
- */
-#define align(x) ((x + (ALIGNMENT - 1) & ~(ALIGNMENT - 1)))
-
-/**
- * This file contains all memory related operations such as copying memory, allocating memory,
- * duplicating memory, freeing memory, etc. 
- */
-typedef struct Metadata {
-    /**
-     * Pointer to the next block of memory
-     */
-    struct Metadata* next;
-    /**
-     * Size in bytes of the memory region 
-     */
-    size_t size;
-    /**
-     * Flag indicating if memory is free or in use
-     */
-    int free;
-} Metadata;
-
-
-/**
- * A pointer to the head of the list of memory blocks
- */
-static Metadata* data = NULL;
 
 /**
  * Search the `data` memory list for a block that best fits the size requirement.
@@ -152,9 +119,6 @@ void* allocMemory(size_t size) {
     } 
 
     // 3. Create Metadata
-    /**
-     * TODO: Add block into memory block list
-     */
     Metadata* metadata = (Metadata*)memory;
     metadata->size = alignedSize;
     metadata->next = NULL;

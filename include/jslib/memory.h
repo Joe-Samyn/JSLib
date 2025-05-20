@@ -12,6 +12,8 @@
 /** 
  * Number of bytes to align to when requesting memory from OS
  * TODO: This should be looked at further b/c not every machine will align to 8 bytes 
+ * TODO: Calling a system call in a #define is not performant. Calls to system are expensive. This will place this
+ * system call everywhere ALIGNMENT is used, which is bad. We need to rethink this. 
 */
 #define ALIGNMENT sysconf(_SC_PAGE_SIZE)
 
