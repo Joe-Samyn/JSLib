@@ -6,6 +6,11 @@
 #include "memory_internal.h"
 
 /**
+ * A pointer to the head of the list of memory blocks
+ */
+Metadata* data = NULL;
+
+/**
  * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
  */
 
@@ -22,7 +27,7 @@
 /**
  * TODO: This is a naive implementation and can be improved
  */
-static Metadata* search(size_t size) {
+Metadata* search(size_t size) {
 
     if (size < 1) {
         return NULL;
@@ -58,17 +63,22 @@ static Metadata* search(size_t size) {
  * @param block The block of memory to insert. Parameter cannot be NULL. If parameter is NULL, -1 is returned from function. 
  * @return 0 if insertion was successful. If insertion failed, a value less than 0 is returned. 
  */
-static int insertBlock(Metadata* block) {
+int insertBlock(Metadata* block) {
 
     if (block == NULL) return -1;
 
+    if (!data) {
+        data = block;
+        return 0;
+    }
+
     Metadata* temp = data;
 
-    while (temp!= NULL) {
+    while (temp->next != NULL) {
         temp = temp->next;
     }
 
-    temp = block;
+    temp->next = block;
 
     return 0;
 }

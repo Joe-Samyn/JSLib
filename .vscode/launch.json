@@ -5,7 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "(lldb) Launch - MacOS",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/test.exe",
+            "args": ["--no-fork"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "logging": {
+                "engineLogging": true,
+                "trace": true,
+                "traceResponse": true
+            }
+        },
+        {
+            "name": "(gdb) Launch - Linux",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/test.exe",
@@ -24,15 +41,13 @@
                 {
                     "description": "Follow forked child processes",
                     "text": "set follow-fork-mode child"
-                  }
+                }
             ],
             "logging": {
                 "engineLogging": true,
                 "trace": true,
                 "traceResponse": true
             }
-
         }
-
     ]
 }

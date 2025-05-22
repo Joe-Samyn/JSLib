@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/Users/joey/Projects/SystemsProgramming/JSLib/build",
+            "binaryPath": "/Users/joey/Projects/SystemsProgramming/JSLib/build/test.exe",
+            "binaryArgs": []
+        }
+    ]
+}

@@ -30,10 +30,6 @@ typedef struct Metadata {
     int free;
 } Metadata;
 
-/**
- * A pointer to the head of the list of memory blocks
- */
-static Metadata* data = NULL;
 
 /**
  * Search the `data` memory list for a block that best fits the size requirement.
@@ -48,7 +44,7 @@ static Metadata* data = NULL;
 /**
  * TODO: This is a naive implementation and can be improved
  */
-static Metadata* search(size_t size);
+Metadata* search(size_t size);
 
 /**
  * Inserts a block of memory into the memory block list. 
@@ -59,6 +55,6 @@ static Metadata* search(size_t size);
  * @param block The block of memory to insert. Parameter cannot be NULL. If parameter is NULL, -1 is returned from function. 
  * @return 0 if insertion was successful. If insertion failed, a value less than 0 is returned. 
  */
-static int insertBlock(Metadata* block);
+int insertBlock(Metadata* block);
 
 #endif
