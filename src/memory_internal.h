@@ -2,6 +2,7 @@
 #define MEMORYINTERNAL_H
 
 #include <stdlib.h>
+#include <uuid/uuid.h>
 
 // Size of the metadata block
 #define METADATA_SIZE sizeof(Metadata)
@@ -16,6 +17,7 @@
  * duplicating memory, freeing memory, etc. 
  */
 typedef struct Metadata {
+    uuid_t id;
     /**
      * Pointer to the next block of memory
      */

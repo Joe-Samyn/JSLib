@@ -2,6 +2,7 @@
 #include <sys/mman.h>
 #include <errno.h>
 #include <assert.h>
+#include <uuid/uuid.h>
 
 #include "memory_internal.h"
 
@@ -34,9 +35,10 @@ Metadata* search(size_t size) {
     }
 
     Metadata* block = NULL;
-    Metadata* temp = data;
+    Metadata* temp = NULL;
+    temp = data;
     int bestFit = INT32_MAX;
-    while(temp != NULL) {
+    while(temp!= NULL) {
 
         // Check for free blocks that match criteria
         if (temp->free && temp->size >= size) {
@@ -72,7 +74,8 @@ int insertBlock(Metadata* block) {
         return 0;
     }
 
-    Metadata* temp = data;
+    Metadata* temp = NULL;
+    temp = data;
 
     while (temp->next != NULL) {
         temp = temp->next;
@@ -130,6 +133,7 @@ void* allocMemory(size_t size) {
 
     // 3. Create Metadata
     Metadata* metadata = (Metadata*)memory;
+    uuid_generate(metadata->id);
     metadata->size = alignedSize;
     metadata->next = NULL;
     metadata->free = 0;
@@ -138,4 +142,11 @@ void* allocMemory(size_t size) {
 
     // 4. Return allocated memory block
     return metadata + 1;
+}
+
+/**
+ * TODO: Not implemented. This is a quick implementation to help with testing other functions. 
+ */
+void deallocMemory(void* ptr) {
+    data = NULL;
 }

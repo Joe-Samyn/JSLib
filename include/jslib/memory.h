@@ -58,6 +58,6 @@ void* memorySet(void* dest, unsigned char value, size_t n);
  */
 void* allocMemory(size_t size);
 
-void deallocMemory();
+void deallocMemory(void* ptr);
 
 #endif
