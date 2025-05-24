@@ -59,4 +59,30 @@ Metadata* search(size_t size);
  */
 int insertBlock(Metadata* block);
 
+/**
+ * Splits a memory region based on the desired size. 
+ * 
+ * This function takes a memory region and splits it into two separate regions: 
+ * - First Region: sizeof(Metadata) + size
+ * - Second Region: remaining bytes from original region 
+ * 
+ * This function will automatically handle: 
+ * - Metadata initialization for both regions
+ * - Linking both memory regions back into the memory pool
+ * - Maintain alignment requirements
+ * 
+ * @note both resulting regions are marked as free after split. 
+ * 
+ * @param region The memory region to split. Must be: 
+ *  - Large enough to hold desired size 
+ *  - Not NULL
+ * @param size The size in bytes of one of the regions that should result from the split. 
+ *  - Greater than 0
+ *  - Less than region->size 
+ *  - Will be aligned to proper alignment 
+ * @return On success: Pointer to first region 
+ *         On failure: NULL and original region is preserved in pool. 
+ */
+Metadata* splitRegion(Metadata* region, size_t size);
+
 #endif

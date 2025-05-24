@@ -1,8 +1,10 @@
 #include "jslib/memory.h"
+#include "jslib/string.h"
 #include <sys/mman.h>
 #include <errno.h>
 #include <assert.h>
 #include <uuid/uuid.h>
+#include <unistd.h>
 
 #include "memory_internal.h"
 
@@ -102,7 +104,6 @@ void* allocMemory(size_t size) {
      * TODO: What happens if memorySize is too large? 
      */
     size_t alignedSize = align(size);
-    assert(sizeof(Metadata) % ALIGNMENT == 0);
     size_t memorySize = alignedSize + sizeof(Metadata);
 
     // 2. Search for open block or Create Block
@@ -118,17 +119,22 @@ void* allocMemory(size_t size) {
         switch(errno) {
             case EINVAL: // len not greater than 0
             {
-
+                char buffer[] = "Invalid argument. The parameter `len` must be greater than 0.";
+                write(STDOUT_FILENO, buffer, strLen(buffer, 256));
             } break;
             case EMFILE: // limit on mapped regions per process is exceeded
             {
-
+                char buffer[] = "Exceeded number of mapped regions per process allowed by the system.";
+                write(STDOUT_FILENO, buffer, strLen(buffer, 256));
             } break;
             case ENOMEM: // insufficient memory available 
             {
-
+                char buffer[] = "Insufficient memory.";
+                write(STDOUT_FILENO, buffer, strLen(buffer, 256));
             } break;
         }
+
+        return NULL;
     } 
 
     // 3. Create Metadata
@@ -141,7 +147,8 @@ void* allocMemory(size_t size) {
     insertBlock(metadata);
 
     // 4. Return allocated memory block
-    return metadata + 1;
+    void* usrMemory = metadata + 1;
+    return usrMemory;
 }
 
 /**

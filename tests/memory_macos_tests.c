@@ -46,6 +46,28 @@ static MunitResult test_align_noRoundUpWhenRequestSizeIsPageSize(const MunitPara
 }
 
 /**
+ * TODO: This test will need to be fixed once memory region splitting is implemented
+ */
+static MunitResult test_allocMemory_returnsPointerToMemoryRegion(const MunitParameter params[], void* fixture) {
+	
+	// Act
+	int* arr = (int*)allocMemory(5 * sizeof(int));
+	for(int i = 0; i < 5; i++) {
+		arr[i] = i;
+	}
+
+	// Assert
+	munit_assert_ptr_not_null(arr);
+	munit_assert_int(arr[0], ==, 0);
+	munit_assert_int(arr[1], ==, 1);
+	munit_assert_int(arr[2], ==, 2);
+	munit_assert_int(arr[3], ==, 3);
+	munit_assert_int(arr[4], ==, 4);
+
+	deallocMemory(NULL);
+}
+
+/**
  **********************************
  * memory_internal.h Tests
  **********************************
@@ -235,6 +257,14 @@ static MunitTest tests[] = {
 	{
 		"test-search-returnsNullWhenNoEmptyBlocks",
 		test_search_returnsNullWhenNoEmptyBlocks,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"test-allocMemory-returnsPointerToMemoryRegion",
+		test_allocMemory_returnsPointerToMemoryRegion,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,
