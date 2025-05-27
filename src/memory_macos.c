@@ -17,6 +17,31 @@ Metadata* data = NULL;
  * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
  */
 
+Metadata* splitRegion(Metadata* region, size_t size) {
+    // 1. Verify region != NULL
+    if (region == NULL) {
+        return NULL;
+    }
+
+    // 2. Vefify region is large enough for size
+    if (region->size < size) {
+        return NULL;
+    }
+
+    // 3. Calculate size of new region including Metadata header
+    
+
+    // 4. Create two new regions that are marked as free, update Metadata for first region 
+    // and create metadata for second region
+    // Ensure new regions size are aligned with platform alignment requirements
+
+    // 5. second->next = first->next & first->next = second
+
+    // 6. Verify in memory pool
+
+    // 7. return first region 
+}
+
 /**
  * Search the `data` memory list for a block that best fits the size requirement.
  * 
