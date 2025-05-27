@@ -23,23 +23,23 @@ Metadata* splitRegion(Metadata* region, size_t size) {
         return NULL;
     }
 
-    // 2. Vefify region is large enough for size
+    // 2. Vefify region is large enough for aligned memory size
     if (region->size < size) {
         return NULL;
     }
 
-    // 3. Calculate size of new region including Metadata header
+    // 3. Create two new regions that are marked as free
 
+    // 3a. Create temp pointer to region as type of byte 
+    // 3b. Add METADATA_SIZE + size to pointer to get start of next memory region 
+    // 3c. Add Metadata at this address that indicates start of next memory region 
+    
 
-    // 4. Create two new regions that are marked as free, update Metadata for first region 
-    // and create metadata for second region
-    // Ensure new regions size are aligned with platform alignment requirements
+    // 4. second->next = first->next & first->next = second
 
-    // 5. second->next = first->next & first->next = second
+    // 5. Verify in memory pool
 
-    // 6. Verify in memory pool
-
-    // 7. return first region 
+    // 6. return first region 
 
     return NULL;
 }
