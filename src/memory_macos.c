@@ -29,7 +29,7 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     }
 
     // 3. Calculate size of new region including Metadata header
-    
+
 
     // 4. Create two new regions that are marked as free, update Metadata for first region 
     // and create metadata for second region
@@ -40,6 +40,8 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     // 6. Verify in memory pool
 
     // 7. return first region 
+
+    return NULL;
 }
 
 /**
@@ -126,41 +128,47 @@ void* allocMemory(size_t size) {
 
     // 1. Determine the proper size to allocate by aligning size to ALIGNMENT boundaries 
     /**
-     * TODO: What happens if memorySize is too large? 
+     * TODO: Need to error out if max memory size allowed to be requested is exceeded
      */
-    size_t alignedSize = align(size);
+    size_t alignedSize = align(size, ALIGNMENT);
     size_t memorySize = alignedSize + sizeof(Metadata);
 
     // 2. Search for open block or Create Block
     
     // 2a. Search 
+    void* memory = search(memorySize);
 
     // 2b. Split needed? 
 
     // 2c. Allocate new memory region
-    void* memory = mmap(NULL, memorySize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-    if (memory == MAP_FAILED) 
-    {
-        switch(errno) {
-            case EINVAL: // len not greater than 0
-            {
-                char buffer[] = "Invalid argument. The parameter `len` must be greater than 0.";
-                write(STDOUT_FILENO, buffer, strLen(buffer, 256));
-            } break;
-            case EMFILE: // limit on mapped regions per process is exceeded
-            {
-                char buffer[] = "Exceeded number of mapped regions per process allowed by the system.";
-                write(STDOUT_FILENO, buffer, strLen(buffer, 256));
-            } break;
-            case ENOMEM: // insufficient memory available 
-            {
-                char buffer[] = "Insufficient memory.";
-                write(STDOUT_FILENO, buffer, strLen(buffer, 256));
-            } break;
-        }
+    if (memory == NULL)
+    {   
+        // Round up to page size
+        memorySize = align(memorySize, sysconf(_SC_PAGE_SIZE));
+        memory = mmap(NULL, memorySize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+        if (memory == MAP_FAILED) 
+        {
+            switch(errno) {
+                case EINVAL: // len not greater than 0
+                {
+                    char buffer[] = "Invalid argument. The parameter `len` must be greater than 0.";
+                    write(STDOUT_FILENO, buffer, strLen(buffer, 256));
+                } break;
+                case EMFILE: // limit on mapped regions per process is exceeded
+                {
+                    char buffer[] = "Exceeded number of mapped regions per process allowed by the system.";
+                    write(STDOUT_FILENO, buffer, strLen(buffer, 256));
+                } break;
+                case ENOMEM: // insufficient memory available 
+                {
+                    char buffer[] = "Insufficient memory.";
+                    write(STDOUT_FILENO, buffer, strLen(buffer, 256));
+                } break;
+            }
 
-        return NULL;
-    } 
+            return NULL;
+        } 
+    }
 
     // 3. Create Metadata
     Metadata* metadata = (Metadata*)memory;

@@ -15,7 +15,18 @@
  * TODO: Calling a system call in a #define is not performant. Calls to system are expensive. This will place this
  * system call everywhere ALIGNMENT is used, which is bad. We need to rethink this. 
 */
-#define ALIGNMENT sysconf(_SC_PAGE_SIZE)
+/**
+ * Define alignment size for system. This ignores SIMD for now. 
+ * On most 64 bit systems, 8 byte alignment is used
+ * On most 32 bit systems, 4 byte alignment is used
+ */
+#if defined(__aarch64__)
+#define ALIGNMENT 8
+#elif defined(__x86_64__)
+#define ALIGNMENT 8
+#else
+#define ALIGNMENT 4
+#endif
 
 /**
  * Copies data from a source memory region into destination memory region

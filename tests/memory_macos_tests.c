@@ -11,13 +11,6 @@
  * memory.h Tests
  **********************************
  */
-static MunitResult test_alignment_isPageSizeOfMachine(const MunitParameter params[], void* fixture) {
-	int exp = sysconf(_SC_PAGE_SIZE);
-	int result = ALIGNMENT;
-	munit_assert_int(exp, ==, result);
-
-	return MUNIT_OK;
-}
 
 /**
  * Tests align rounds x value up to next multiple of ALIGNMENT successfully
@@ -25,9 +18,9 @@ static MunitResult test_alignment_isPageSizeOfMachine(const MunitParameter param
 static MunitResult test_align_roundsSizeUpToMultipleOfAlignment(const MunitParameter params[], void* fixture) {
 
 	int n = 7;
-	int exp = 16384;
+	int exp = 8;
 
-	int result = align(n);
+	int result = align(n, ALIGNMENT);
 
 	munit_assert_int(exp, ==, result);
 
@@ -35,10 +28,10 @@ static MunitResult test_align_roundsSizeUpToMultipleOfAlignment(const MunitParam
 }
 
 static MunitResult test_align_noRoundUpWhenRequestSizeIsPageSize(const MunitParameter params[], void* fixture) {
-	int exp = sysconf(_SC_PAGE_SIZE);
-	int size = exp - METADATA_SIZE;
+	int exp = 8;
+	int size = 8;
 
-	int result = align(size);
+	int result = align(size, ALIGNMENT);
 
 	munit_assert_int(exp, ==, result);
 
@@ -209,14 +202,6 @@ static MunitTest tests[] = {
 	{
 		"/test-align-success",
 		test_align_roundsSizeUpToMultipleOfAlignment,
-		NULL,
-		NULL,
-		MUNIT_TEST_OPTION_NONE,
-		NULL
-	},
-	{
-		"/test-alignment-isPageSize",
-		test_alignment_isPageSizeOfMachine,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,

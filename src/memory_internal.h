@@ -10,7 +10,7 @@
  * Aligns a number x to the next multiple of ALIGNMENT. Used to round up and get the 
  * largest memory size that is a multiple of ALIGNMENT needed to store the data.
  */
-#define align(x) ((x + (ALIGNMENT - 1) & ~(ALIGNMENT - 1)))
+#define align(x, y) ((x + (y - 1) & ~(y - 1)))
 
 /**
  * This file contains all memory related operations such as copying memory, allocating memory,
