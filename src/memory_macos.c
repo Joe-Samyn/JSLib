@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "memory_internal.h"
+#include "type.h"
 
 /**
  * A pointer to the head of the list of memory blocks
@@ -31,17 +32,32 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     // 3. Create two new regions that are marked as free
 
     // 3a. Create temp pointer to region as type of byte 
+    byte* temp = (byte*)region;
+
     // 3b. Add METADATA_SIZE + size to pointer to get start of next memory region 
+    int regOneSize = METADATA_SIZE + size;
+    temp += regOneSize; // NOTE: This should jump forward (METADATA_SIZE + size) bytes
+
     // 3c. Add Metadata at this address that indicates start of next memory region 
+    Metadata* regionTwo = (Metadata*)temp;
+    uuid_generate(regionTwo->id);
+    regionTwo->size = region->size - regOneSize;
+    regionTwo->free = 1;
+    regionTwo->next = region->next;
     
-
     // 4. second->next = first->next & first->next = second
+    region->next = regionTwo;
+    region->free = 1;
+    region->size = size;    
 
-    // 5. Verify in memory pool
+    /**
+     * TODO: Could verify memory pool is accurate before returing to ensure
+     * memory integrity. This might be worth it because the entire programs
+     * memory is stored in this memory pool.
+     */
 
     // 6. return first region 
-
-    return NULL;
+    return region;
 }
 
 /**
