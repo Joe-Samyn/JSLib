@@ -196,6 +196,35 @@ static MunitResult test_search_returnsNullWhenNoMemoryPool(const MunitParameter 
 	return MUNIT_OK;
 }
 
+static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(const MunitParameter params[], void* fixture) {
+	// Arrange - Setup pool 
+	int size = 500;
+	Metadata* memory = (Metadata*)allocMemory(size);
+	memory->free = 1;
+
+	int expFree = 1;
+	int expSize = 100;
+	uuid_t expId;
+	uuid_copy(expId, memory->id);
+	int expRegTwoSize = size - (expSize + METADATA_SIZE);
+
+	// Act
+	Metadata* result = splitRegion(memory, 100);
+	Metadata* regTwo = result->next;
+
+	// Assert - memory pool integrity 
+	munit_assert_ptr_not_null(result->next);
+	munit_assert_int(uuid_compare(expId, result->id), ==, 0);
+
+	// Assert - memory block returned correct
+	munit_assert_int(expFree, ==, result->free);
+	munit_assert_int(expSize, ==, result->size);
+
+	// Assert - second block is correct
+	munit_assert_int(result->free, ==, 1);
+	munit_assert_int(result->size, ==, expRegTwoSize);
+}
+
 /**********************************/
 
 static MunitTest tests[] = {
@@ -250,6 +279,14 @@ static MunitTest tests[] = {
 	{
 		"test-allocMemory-returnsPointerToMemoryRegion",
 		test_allocMemory_returnsPointerToMemoryRegion,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool",
+		test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,
