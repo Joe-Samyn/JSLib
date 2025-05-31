@@ -16,8 +16,8 @@ Metadata* data = NULL;
 
 /**
  * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
+ * TODO: Could verify memory pool is accurate before returing to ensure memory integrity. This might be worth it because the entire programs memory is stored in this memory pool.
  */
-
 Metadata* splitRegion(Metadata* region, size_t size) {
     // 1. Verify region != NULL
     if (region == NULL) {
@@ -28,8 +28,6 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     if (region->size < size) {
         return NULL;
     }
-
-    // 3. Create two new regions that are marked as free
 
     // 3a. Create temp pointer to region as type of byte 
     byte* temp = (byte*)region;
@@ -49,12 +47,6 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     region->next = regionTwo;
     region->free = 1;
     region->size = size;    
-
-    /**
-     * TODO: Could verify memory pool is accurate before returing to ensure
-     * memory integrity. This might be worth it because the entire programs
-     * memory is stored in this memory pool.
-     */
 
     // 6. return first region 
     return region;

@@ -198,31 +198,28 @@ static MunitResult test_search_returnsNullWhenNoMemoryPool(const MunitParameter 
 
 static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(const MunitParameter params[], void* fixture) {
 	// Arrange - Setup pool 
-	int size = 500;
-	Metadata* memory = (Metadata*)allocMemory(size);
-	memory->free = 1;
+	Metadata* regionOne = (Metadata*)allocMemory(500);
+	regionOne -= 1;
 
-	int expFree = 1;
-	int expSize = 100;
-	uuid_t expId;
-	uuid_copy(expId, memory->id);
-	int expRegTwoSize = size - (expSize + METADATA_SIZE);
+	size_t splitSize = 100;
+	uuid_t expRegOneId;
+	uuid_copy(expRegOneId, regionOne->id);
+	int expRegionTwoSize = (align(500, ALIGNMENT) - (METADATA_SIZE + splitSize));
 
 	// Act
-	Metadata* result = splitRegion(memory, 100);
-	Metadata* regTwo = result->next;
+	Metadata* result = splitRegion(regionOne, splitSize);
+	Metadata* regionTwo = result->next;
 
-	// Assert - memory pool integrity 
-	munit_assert_ptr_not_null(result->next);
-	munit_assert_int(uuid_compare(expId, result->id), ==, 0);
-
-	// Assert - memory block returned correct
-	munit_assert_int(expFree, ==, result->free);
-	munit_assert_int(expSize, ==, result->size);
-
-	// Assert - second block is correct
+	// Assert - region one
+	munit_assert_ptr_not_null(result);
+	munit_assert_int(result->size, ==, 100);
 	munit_assert_int(result->free, ==, 1);
-	munit_assert_int(result->size, ==, expRegTwoSize);
+	munit_assert_int(uuid_compare(expRegOneId, result->id), ==, 0);
+
+	// Assert - region two
+	munit_assert_ptr_not_null(regionTwo);
+	munit_assert_int(regionTwo->free, ==, 1);
+	munit_assert_int(regionTwo->size, ==, expRegionTwoSize);
 }
 
 /**********************************/
