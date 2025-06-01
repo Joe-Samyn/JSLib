@@ -204,7 +204,7 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 	size_t splitSize = 100;
 	uuid_t expRegOneId;
 	uuid_copy(expRegOneId, regionOne->id);
-	int expRegionTwoSize = (align(500, ALIGNMENT) - (METADATA_SIZE + splitSize));
+	int expRegionTwoSize = (align(500 + METADATA_SIZE, ALIGNMENT) - (METADATA_SIZE + splitSize));
 
 	// Act
 	Metadata* result = splitRegion(regionOne, splitSize);

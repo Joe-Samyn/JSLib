@@ -138,22 +138,27 @@ void* allocMemory(size_t size) {
     /**
      * TODO: Need to error out if max memory size allowed to be requested is exceeded
      */
-    size_t alignedSize = align(size, ALIGNMENT);
-    size_t memorySize = alignedSize + sizeof(Metadata);
+    size_t memorySize = size + sizeof(Metadata);
+    size_t alignedSize = align(memorySize, ALIGNMENT);
 
     // 2. Search for open block or Create Block
     
     // 2a. Search 
-    void* memory = search(memorySize);
+    Metadata* memory = search(memorySize);
 
-    // 2b. Split needed? 
-
-    // 2c. Allocate new memory region
-    if (memory == NULL)
+    // 2b. Split needed? What is a good buffer? 
+    if (memory != NULL)
+    {
+        if ((memory->size - size) > MIN_BLOCK_SIZE)
+        {
+            memory = splitRegion(memory, size);
+        }
+    }
+    else // 2c. Allocate new memory region
     {   
         // Round up to page size
-        memorySize = align(memorySize, sysconf(_SC_PAGE_SIZE));
-        memory = mmap(NULL, memorySize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+        alignedSize = align(alignedSize, sysconf(_SC_PAGE_SIZE));
+        memory = mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
         if (memory == MAP_FAILED) 
         {
             switch(errno) {
@@ -176,19 +181,28 @@ void* allocMemory(size_t size) {
 
             return NULL;
         } 
+
+        // 3. Create Metadata
+        memory = (Metadata*)memory;
+        uuid_generate(memory->id);
+        memory->size = alignedSize;
+        memory->next = NULL;
+        memory->free = 1;
+
+        // Split? 
+        if (alignedSize - size > MIN_BLOCK_SIZE)
+        {
+            memory = splitRegion(memory, size);
+        }
+        else
+        {
+            insertBlock(memory);
+        }
     }
 
-    // 3. Create Metadata
-    Metadata* metadata = (Metadata*)memory;
-    uuid_generate(metadata->id);
-    metadata->size = alignedSize;
-    metadata->next = NULL;
-    metadata->free = 0;
-
-    insertBlock(metadata);
-
     // 4. Return allocated memory block
-    void* usrMemory = metadata + 1;
+    memory->free = 0;
+    void* usrMemory = (void*)(memory + 1);
     return usrMemory;
 }
 

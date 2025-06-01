@@ -4,8 +4,29 @@
 #include <stdlib.h>
 #include <uuid/uuid.h>
 
+
+/** 
+ * Number of bytes to align to when requesting memory from OS
+ * TODO: This should be looked at further b/c not every machine will align to 8 bytes 
+ * TODO: Calling a system call in a #define is not performant. Calls to system are expensive. This will place this
+ * system call everywhere ALIGNMENT is used, which is bad. We need to rethink this. 
+*/
+/**
+ * Define alignment size for system. This ignores SIMD for now. 
+ * On most 64 bit systems, 8 byte alignment is used
+ * On most 32 bit systems, 4 byte alignment is used
+ */
+#if defined(__aarch64__)
+#define ALIGNMENT 8
+#elif defined(__x86_64__)
+#define ALIGNMENT 8
+#else
+#define ALIGNMENT 4
+#endif
+
 // Size of the metadata block
 #define METADATA_SIZE sizeof(Metadata)
+#define MIN_BLOCK_SIZE (METADATA_SIZE + ALIGNMENT)
 /**
  * Aligns a number x to the next multiple of ALIGNMENT. Used to round up and get the 
  * largest memory size that is a multiple of ALIGNMENT needed to store the data.

@@ -9,25 +9,6 @@
     TODO: Add errorCode property that is set when error occurs. Maybe make it a queue and pop the most recent error code off the queue? 
 */
 
-/** 
- * Number of bytes to align to when requesting memory from OS
- * TODO: This should be looked at further b/c not every machine will align to 8 bytes 
- * TODO: Calling a system call in a #define is not performant. Calls to system are expensive. This will place this
- * system call everywhere ALIGNMENT is used, which is bad. We need to rethink this. 
-*/
-/**
- * Define alignment size for system. This ignores SIMD for now. 
- * On most 64 bit systems, 8 byte alignment is used
- * On most 32 bit systems, 4 byte alignment is used
- */
-#if defined(__aarch64__)
-#define ALIGNMENT 8
-#elif defined(__x86_64__)
-#define ALIGNMENT 8
-#else
-#define ALIGNMENT 4
-#endif
-
 /**
  * Copies data from a source memory region into destination memory region
  * 
@@ -57,6 +38,10 @@ void* memorySet(void* dest, unsigned char value, size_t n);
  * Allocate a block of memory that is at least `size` in bytes. Memory is uninitialized on allocation.
  * Memory returned is always aligned to the largest type on the platform. The alignment is determined
  * by the ALIGNMENT macro. 
+ * 
+ * The allocator will use the "best fit" algorithm to search for a memory block that matches the size
+ * being requested. This is not the most optimal and could lead to higher fragmentation depending on how
+ * the allocator is used. This is an initial MVP implementation and will be optiomized.
  * 
  * TODO: This current implementation is NOT thread safe.
  * TODO: This implementation will only work on OSX, it needs to be ported to Linux and Windows 
