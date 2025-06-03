@@ -25,7 +25,8 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     }
 
     // 2. Vefify region is large enough for aligned memory size
-    if (region->size < size) {
+    int regOneSize = align(METADATA_SIZE + size, ALIGNMENT);
+    if (region->size < regOneSize) {
         return NULL;
     }
 
@@ -33,7 +34,6 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     byte* temp = (byte*)region;
 
     // 3b. Add METADATA_SIZE + size to pointer to get start of next memory region 
-    int regOneSize = METADATA_SIZE + size;
     temp += regOneSize; // NOTE: This should jump forward (METADATA_SIZE + size) bytes
 
     // 3c. Add Metadata at this address that indicates start of next memory region 

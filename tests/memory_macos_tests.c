@@ -200,11 +200,12 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 	// Arrange - Setup pool 
 	Metadata* regionOne = (Metadata*)allocMemory(500);
 	regionOne -= 1;
+	regionOne->free = 1;
 
 	size_t splitSize = 100;
 	uuid_t expRegOneId;
 	uuid_copy(expRegOneId, regionOne->id);
-	int expRegionTwoSize = (align(500 + METADATA_SIZE, ALIGNMENT) - (METADATA_SIZE + splitSize));
+	int expRegionTwoSize = 500 - align(100 + METADATA_SIZE, ALIGNMENT);
 
 	// Act
 	Metadata* result = splitRegion(regionOne, splitSize);
@@ -220,6 +221,8 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 	munit_assert_ptr_not_null(regionTwo);
 	munit_assert_int(regionTwo->free, ==, 1);
 	munit_assert_int(regionTwo->size, ==, expRegionTwoSize);
+
+	free(NULL);
 }
 
 /**********************************/

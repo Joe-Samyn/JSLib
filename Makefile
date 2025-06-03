@@ -59,7 +59,6 @@ ${BUILD_DIR}/${SRC_DIR}/%.o: ${SRC_DIR}/%.c
 	@echo "Compiling source files.."
 	@mkdir -p ${BUILD_DIR}/${BUILD}
 	@mkdir -p ${BUILD_DIR}/${SRC_DIR}
-	${AR} rcs $@ $^
 	${GCC} ${C_FLAGS} ${INCLUDES} -c $< -o $@
 
 
