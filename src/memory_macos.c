@@ -83,6 +83,7 @@ Metadata* search(size_t size) {
 
             // We found a block that is a better fit
             if (bestFit > delta) {
+                bestFit = delta;
                 block = temp;
             }
         }
