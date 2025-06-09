@@ -106,5 +106,12 @@ int insertBlock(Metadata* block);
  */
 Metadata* splitRegion(Metadata* region, size_t size);
 
+/**
+ * Get the root of the memory pool
+ * @note This should only be used for unit tests. It's primary purpose is to get the 
+ * root for verifying memory operations
+ * @return Root node of the memory pool 
+ */
+Metadata* getMemPoolRoot();
 
 #endif

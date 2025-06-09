@@ -14,6 +14,10 @@
  */
 Metadata* data = NULL;
 
+Metadata* getMemPoolRoot() {
+    return data;
+}
+
 /**
  * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
  * TODO: Could verify memory pool is accurate before returing to ensure memory integrity. This might be worth it because the entire programs memory is stored in this memory pool.
@@ -208,8 +212,18 @@ void* allocMemory(size_t size) {
 }
 
 /**
- * TODO: Not implemented. This is a quick implementation to help with testing other functions. 
+ * TODO: Need error handling
+ * TODO: Need to ensure that pointer math lands on Metadata header, if not, then user did not pass valid pointer
  */
 void deallocMemory(void* ptr) {
-    data = NULL;
+    // Convert to byte for pointer arithmatic 
+    Metadata* temp = (Metadata*)ptr;
+
+    // Subtract bytes to get to start of Metadata header
+    temp -= 1;
+
+    // Convert to Metadata* and set free to true
+    temp = (Metadata*)ptr;
+    temp->free = TRUE;
+    ptr = NULL;
 }
