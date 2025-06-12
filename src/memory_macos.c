@@ -14,6 +14,20 @@
  */
 Metadata* data = NULL;
 
+/**
+ * TODO: We may want to completely release the memory back to the OS. However, this may affect performance metrics
+ */
+void clearMemoryPool() {
+    void* startingAddr = (void*)data;
+    int pageSize = sysconf(_SC_PAGESIZE);
+    int result = munmap(startingAddr, pageSize);
+    if (result < 0)
+    {
+        int err = errno;
+
+    }
+}
+
 Metadata* getMemPoolRoot() {
     return data;
 }

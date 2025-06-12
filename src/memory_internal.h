@@ -114,4 +114,11 @@ Metadata* splitRegion(Metadata* region, size_t size);
  */
 Metadata* getMemPoolRoot();
 
+/**
+ * Clear the memory pool structures completely from memory to reset allocator
+ * @note Should be used for unit tests only. This helps reset state between tests
+ * to ensure there are no lingering pointers. 
+ */
+void clearMemoryPool();
+
 #endif
