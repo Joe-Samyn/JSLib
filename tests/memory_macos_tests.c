@@ -71,10 +71,10 @@ static MunitResult test_deallocMemory_freesBlockAssociatedWithPointer(const Muni
 
 	// Act
 	deallocMemory(memory);
+	memory = NULL;
 
 	// Assert
 	munit_assert_int(root->free, ==, TRUE);
-	munit_assert_ptr_null(memory);
 
 	clearMemoryPool();
 

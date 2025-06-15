@@ -13,19 +13,13 @@
  * A pointer to the head of the list of memory blocks
  */
 Metadata* data = NULL;
+void* head = NULL;
 
 /**
  * TODO: We may want to completely release the memory back to the OS. However, this may affect performance metrics
  */
 void clearMemoryPool() {
-    void* startingAddr = (void*)data;
-    int pageSize = sysconf(_SC_PAGESIZE);
-    int result = munmap(startingAddr, pageSize);
-    if (result < 0)
-    {
-        int err = errno;
-
-    }
+    data = NULL;
 }
 
 Metadata* getMemPoolRoot() {
@@ -178,6 +172,7 @@ void* allocMemory(size_t size) {
         // Round up to page size
         alignedSize = align(alignedSize, sysconf(_SC_PAGE_SIZE));
         memory = mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+        head = memory;
         if (memory == MAP_FAILED) 
         {
             switch(errno) {
@@ -213,10 +208,9 @@ void* allocMemory(size_t size) {
         {
             memory = splitRegion(memory, size);
         }
-        else
-        {
-            insertBlock(memory);
-        }
+
+        // Block still needs to be inserted since we allocated a new page of memory from the OS
+        insertBlock(memory);
     }
 
     // 4. Return allocated memory block
@@ -236,8 +230,6 @@ void deallocMemory(void* ptr) {
     // Subtract bytes to get to start of Metadata header
     temp -= 1;
 
-    // Convert to Metadata* and set free to true
-    temp = (Metadata*)ptr;
+    // Free block of memory
     temp->free = TRUE;
-    ptr = NULL;
 }
