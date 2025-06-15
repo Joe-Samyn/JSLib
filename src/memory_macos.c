@@ -11,9 +11,9 @@
 
 /**
  * A pointer to the head of the list of memory blocks
+ * TODO: Maybe look into a memory pool system that can support multiple allocators such as MemoryPool object
  */
 Metadata* data = NULL;
-void* head = NULL;
 
 /**
  * TODO: We may want to completely release the memory back to the OS. However, this may affect performance metrics
@@ -157,7 +157,8 @@ void* allocMemory(size_t size) {
     // 2. Search for open block or Create Block
     
     // 2a. Search 
-    Metadata* memory = search(memorySize);
+    // We do not need to search for memorySize here, just size. If a block is in the pool, the sizeof(Metadata) is already accounted for
+    Metadata* memory = search(size);
 
     // 2b. Split needed? What is a good buffer? 
     if (memory != NULL)
@@ -172,7 +173,6 @@ void* allocMemory(size_t size) {
         // Round up to page size
         alignedSize = align(alignedSize, sysconf(_SC_PAGE_SIZE));
         memory = mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-        head = memory;
         if (memory == MAP_FAILED) 
         {
             switch(errno) {
@@ -222,6 +222,8 @@ void* allocMemory(size_t size) {
 /**
  * TODO: Need error handling
  * TODO: Need to ensure that pointer math lands on Metadata header, if not, then user did not pass valid pointer
+ * TODO: Need to add memory coalescing to merge adjacent free blocks back together on free
+ * TODO: Need to validate that ptr actually lies within memory pool and is not outside the bounds 
  */
 void deallocMemory(void* ptr) {
     // Convert to byte for pointer arithmatic 
