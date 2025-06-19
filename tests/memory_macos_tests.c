@@ -4,7 +4,6 @@
 #include "type.h"
 
 #include <unistd.h>
-#include <uuid/uuid.h>
 
 
 /**
@@ -132,19 +131,16 @@ static MunitResult test_insertBlock_insertsBlocksAtEnd(const MunitParameter para
 static MunitResult test_search_returnsFreeBlockClosestToSize(const MunitParameter params[], void* fixture) {
 	// Arrange
 	Metadata m_one;
-	uuid_generate(m_one.id);
 	m_one.next = NULL;
 	m_one.size = 50;
 	m_one.free = 0;
 
 	Metadata m_two;
-	uuid_generate(m_two.id);
 	m_two.next = NULL;
 	m_two.size = 20;
 	m_two.free = 0;
 
 	Metadata m_three;
-	uuid_generate(m_three.id);
 	m_three.next = NULL;
 	m_three.size = 40;
 	m_three.free = 1;
@@ -161,7 +157,6 @@ static MunitResult test_search_returnsFreeBlockClosestToSize(const MunitParamete
 	// Assert
 	munit_assert_int(m_three.size, ==, result->size);
 	munit_assert_int(m_three.free, ==, result->free);
-	munit_assert_int(uuid_compare(result->id, m_three.id), ==, 0);
 
 	clearMemoryPool();
 
@@ -171,19 +166,16 @@ static MunitResult test_search_returnsFreeBlockClosestToSize(const MunitParamete
 static MunitResult test_search_returnsNullWhenNoEmptyBlocks(const MunitParameter params[], void* fixture) {
 	// Arrange
 	Metadata m_one;
-	uuid_generate(m_one.id);
 	m_one.next = NULL;
 	m_one.size = 50;
 	m_one.free = 0;
 
 	Metadata m_two;
-	uuid_generate(m_two.id);
 	m_two.next = NULL;
 	m_two.size = 20;
 	m_two.free = 0;
 
 	Metadata m_three;
-	uuid_generate(m_three.id);
 	m_three.next = NULL;
 	m_three.size = 40;
 	m_three.free = 0;
@@ -226,7 +218,6 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 
 	size_t splitSize = 100;
 	uuid_t expRegOneId;
-	uuid_copy(expRegOneId, regionOne->id);
 	int expRegionTwoSize = 500 - align(100 + METADATA_SIZE, ALIGNMENT);
 
 	// Act
@@ -237,7 +228,6 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 	munit_assert_ptr_not_null(result);
 	munit_assert_int(result->size, ==, 100);
 	munit_assert_int(result->free, ==, 1);
-	munit_assert_int(uuid_compare(expRegOneId, result->id), ==, 0);
 
 	// Assert - region two
 	munit_assert_ptr_not_null(regionTwo);

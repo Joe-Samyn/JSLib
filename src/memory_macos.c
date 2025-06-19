@@ -3,7 +3,6 @@
 #include <sys/mman.h>
 #include <errno.h>
 #include <assert.h>
-#include <uuid/uuid.h>
 #include <unistd.h>
 
 #include "memory_internal.h"
@@ -50,7 +49,6 @@ Metadata* splitRegion(Metadata* region, size_t size) {
 
     // 3c. Add Metadata at this address that indicates start of next memory region 
     Metadata* regionTwo = (Metadata*)temp;
-    uuid_generate(regionTwo->id);
     regionTwo->size = region->size - regOneSize;
     regionTwo->free = 1;
     regionTwo->next = region->next;
@@ -198,7 +196,6 @@ void* allocMemory(size_t size) {
 
         // 3. Create Metadata
         memory = (Metadata*)memory;
-        uuid_generate(memory->id);
         memory->size = alignedSize;
         memory->next = NULL;
         memory->free = 1;

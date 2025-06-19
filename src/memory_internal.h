@@ -38,7 +38,6 @@
  * duplicating memory, freeing memory, etc. 
  */
 typedef struct Metadata {
-    uuid_t id;
     /**
      * Pointer to the next block of memory
      */
