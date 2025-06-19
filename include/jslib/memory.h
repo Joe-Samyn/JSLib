@@ -1,13 +1,29 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "type.h"
+
 #include <stdlib.h>
 #include <stddef.h>
-#include <unistd.h>
 
 /** 
     TODO: Add errorCode property that is set when error occurs. Maybe make it a queue and pop the most recent error code off the queue? 
 */
+/**
+ * An object that represents a memory pool. 
+ */
+typedef struct {
+    /**
+     * Root node of the memory pool
+     */
+    Metadata* root;
+} MemoryPool;
+
+/**
+ * A pointer to the head of the list of memory blocks
+ * TODO: Maybe look into a memory pool system that can support multiple allocators such as MemoryPool object
+ */
+extern MemoryPool globalPool;
 
 /**
  * Copies data from a source memory region into destination memory region
@@ -39,7 +55,7 @@ void* memorySet(void* dest, unsigned char value, size_t n);
  * Memory returned is always aligned to the largest type on the platform. The alignment is determined
  * by the ALIGNMENT macro. 
  * 
- * The allocator will use the "best fit" algorithm to search for a memory block that matches the size
+ * @note The allocator will use the "best fit" algorithm to search for a memory block that matches the size
  * being requested. This is not the most optimal and could lead to higher fragmentation depending on how
  * the allocator is used. This is an initial MVP implementation and will be optiomized.
  * 
@@ -54,6 +70,15 @@ void* memorySet(void* dest, unsigned char value, size_t n);
  */
 void* allocMemory(size_t size);
 
+/**
+ * Deallocate a block of memory pointed to by ptr. When memory is deallocated, it is coalesced 
+ * with neighboring free memory blocks. This function does not release memory back to the operating 
+ * system. 
+ * 
+ * @param ptr A pointer to the memory region that is to be deallocated. It must not be null
+ * and it must point to the original pointer returned from allocMemory. Memory will not be deallocated
+ * if the pointer does not point to a valid memory region and deallocation will request will be ignored. 
+ */
 void deallocMemory(void* ptr);
 
 #endif

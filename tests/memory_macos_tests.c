@@ -57,15 +57,12 @@ static MunitResult test_allocMemory_returnsPointerToMemoryRegion(const MunitPara
 	munit_assert_int(arr[3], ==, 3);
 	munit_assert_int(arr[4], ==, 4);
 
-	clearMemoryPool();
-
 	return MUNIT_OK;
 }
 
 static MunitResult test_deallocMemory_freesBlockAssociatedWithPointer(const MunitParameter params[], void* fixture) {
 	// Arrange
 	int* memory = (int*)allocMemory(500 * sizeof(int));
-	Metadata* root = getMemPoolRoot();
 	
 
 	// Act
@@ -73,9 +70,7 @@ static MunitResult test_deallocMemory_freesBlockAssociatedWithPointer(const Muni
 	memory = NULL;
 
 	// Assert
-	munit_assert_int(root->free, ==, TRUE);
-
-	clearMemoryPool();
+	munit_assert_int(globalPool.root->free, ==, TRUE);
 
 	return MUNIT_OK;
 }
@@ -123,8 +118,6 @@ static MunitResult test_insertBlock_insertsBlocksAtEnd(const MunitParameter para
 	munit_assert_int(m_two.next->size, ==, 40);
 	munit_assert_int(m_two.next->free, ==, 1);
 
-	clearMemoryPool();
-
 	return MUNIT_OK;
 }
 
@@ -158,8 +151,6 @@ static MunitResult test_search_returnsFreeBlockClosestToSize(const MunitParamete
 	munit_assert_int(m_three.size, ==, result->size);
 	munit_assert_int(m_three.free, ==, result->free);
 
-	clearMemoryPool();
-
 	return MUNIT_OK;
 }
 
@@ -191,8 +182,6 @@ static MunitResult test_search_returnsNullWhenNoEmptyBlocks(const MunitParameter
 	// Assert
 	munit_assert_ptr_null(result);
 
-	clearMemoryPool();
-
 	return MUNIT_OK;
 }
 
@@ -204,8 +193,6 @@ static MunitResult test_search_returnsNullWhenNoMemoryPool(const MunitParameter 
 
 	// Assert
 	munit_assert_ptr_null(result);
-
-	clearMemoryPool();
 
 	return MUNIT_OK;
 }
@@ -233,8 +220,6 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 	munit_assert_ptr_not_null(regionTwo);
 	munit_assert_int(regionTwo->free, ==, 1);
 	munit_assert_int(regionTwo->size, ==, expRegionTwoSize);
-
-	clearMemoryPool();
 
 	return MUNIT_OK;
 }

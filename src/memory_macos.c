@@ -8,22 +8,7 @@
 #include "memory_internal.h"
 #include "type.h"
 
-/**
- * A pointer to the head of the list of memory blocks
- * TODO: Maybe look into a memory pool system that can support multiple allocators such as MemoryPool object
- */
-Metadata* data = NULL;
-
-/**
- * TODO: We may want to completely release the memory back to the OS. However, this may affect performance metrics
- */
-void clearMemoryPool() {
-    data = NULL;
-}
-
-Metadata* getMemPoolRoot() {
-    return data;
-}
+MemoryPool globalPool = { };
 
 /**
  * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
@@ -83,7 +68,7 @@ Metadata* search(size_t size) {
 
     Metadata* block = NULL;
     Metadata* temp = NULL;
-    temp = data;
+    temp = globalPool.root;
     int bestFit = INT32_MAX;
     while(temp!= NULL) {
 
@@ -117,13 +102,13 @@ int insertBlock(Metadata* block) {
 
     if (block == NULL) return -1;
 
-    if (!data) {
-        data = block;
+    if (!globalPool.root) {
+        globalPool.root = block;
         return 0;
     }
 
     Metadata* temp = NULL;
-    temp = data;
+    temp = globalPool.root;
 
     while (temp->next != NULL) {
         temp = temp->next;
@@ -176,18 +161,12 @@ void* allocMemory(size_t size) {
             switch(errno) {
                 case EINVAL: // len not greater than 0
                 {
-                    char buffer[] = "Invalid argument. The parameter `len` must be greater than 0.";
-                    write(STDOUT_FILENO, buffer, strLen(buffer, 256));
                 } break;
                 case EMFILE: // limit on mapped regions per process is exceeded
                 {
-                    char buffer[] = "Exceeded number of mapped regions per process allowed by the system.";
-                    write(STDOUT_FILENO, buffer, strLen(buffer, 256));
                 } break;
                 case ENOMEM: // insufficient memory available 
                 {
-                    char buffer[] = "Insufficient memory.";
-                    write(STDOUT_FILENO, buffer, strLen(buffer, 256));
                 } break;
             }
 

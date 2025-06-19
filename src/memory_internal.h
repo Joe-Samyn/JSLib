@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <uuid/uuid.h>
+#include "type.h"
 
 
 /** 
@@ -33,24 +34,6 @@
  */
 #define align(x, y) ((x + (y - 1) & ~(y - 1)))
 
-/**
- * This file contains all memory related operations such as copying memory, allocating memory,
- * duplicating memory, freeing memory, etc. 
- */
-typedef struct Metadata {
-    /**
-     * Pointer to the next block of memory
-     */
-    struct Metadata* next;
-    /**
-     * Size in bytes of the memory region 
-     */
-    size_t size;
-    /**
-     * Flag indicating if memory is free or in use
-     */
-    int free;
-} Metadata;
 
 
 /**
@@ -104,20 +87,5 @@ int insertBlock(Metadata* block);
  *         On failure: NULL and original region is preserved in pool. 
  */
 Metadata* splitRegion(Metadata* region, size_t size);
-
-/**
- * Get the root of the memory pool
- * @note This should only be used for unit tests. It's primary purpose is to get the 
- * root for verifying memory operations
- * @return Root node of the memory pool 
- */
-Metadata* getMemPoolRoot();
-
-/**
- * Clear the memory pool structures completely from memory to reset allocator
- * @note Should be used for unit tests only. This helps reset state between tests
- * to ensure there are no lingering pointers. 
- */
-void clearMemoryPool();
 
 #endif
