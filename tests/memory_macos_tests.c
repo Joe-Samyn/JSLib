@@ -38,9 +38,6 @@ static MunitResult test_align_noRoundUpWhenRequestSizeIsPageSize(const MunitPara
 	return MUNIT_OK;
 }
 
-/**
- * TODO: This test will need to be fixed once memory region splitting is implemented
- */
 static MunitResult test_allocMemory_returnsPointerToMemoryRegion(const MunitParameter params[], void* fixture) {
 	
 	// Act
@@ -56,6 +53,19 @@ static MunitResult test_allocMemory_returnsPointerToMemoryRegion(const MunitPara
 	munit_assert_int(arr[2], ==, 2);
 	munit_assert_int(arr[3], ==, 3);
 	munit_assert_int(arr[4], ==, 4);
+
+	return MUNIT_OK;
+}
+
+static MunitResult test_allocMemory_returnsNullWhenSizeLessThanOne(const MunitParameter params[], void* fixture) {
+	// arrange
+	int size = 0;
+
+	// act
+	int* result = (int*)allocMemory(size * sizeof(int));
+
+	// assert
+	munit_assert_ptr_null(result);
 
 	return MUNIT_OK;
 }
@@ -138,9 +148,9 @@ static MunitResult test_search_returnsFreeBlockClosestToSize(const MunitParamete
 	m_three.size = 40;
 	m_three.free = 1;
 
-	int oneResult = insertBlock(&m_one);
-	int twoResult = insertBlock(&m_two);
-	int threeResult = insertBlock(&m_three);
+	insertBlock(&m_one);
+	insertBlock(&m_two);
+	insertBlock(&m_three);
 
 	size_t size = 20;
 	
@@ -171,9 +181,9 @@ static MunitResult test_search_returnsNullWhenNoEmptyBlocks(const MunitParameter
 	m_three.size = 40;
 	m_three.free = 0;
 
-	int oneResult = insertBlock(&m_one);
-	int twoResult = insertBlock(&m_two);
-	int threeResult = insertBlock(&m_three);
+	insertBlock(&m_one);
+	insertBlock(&m_two);
+	insertBlock(&m_three);
 
 	// Act
 	size_t size = 20;
@@ -204,7 +214,6 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 	regionOne->free = 1;
 
 	size_t splitSize = 100;
-	uuid_t expRegOneId;
 	int expRegionTwoSize = 500 - align(100 + METADATA_SIZE, ALIGNMENT);
 
 	// Act
@@ -222,6 +231,44 @@ static MunitResult test_splitRegion_splitsMemoryRegionAndInsertsBothIntoPool(con
 	munit_assert_int(regionTwo->size, ==, expRegionTwoSize);
 
 	return MUNIT_OK;
+}
+
+/**
+ * TODO: Join is causing infinite loop
+ */
+static MunitResult test_joinRegion_combinesTwoValidFreeMemoryRegionsIntoOne(const MunitParameter params[], void* fixture) {
+	// arrange
+	Metadata mOne = {};
+	mOne.next = NULL;
+	mOne.size = 50;
+	mOne.free = TRUE;
+
+	Metadata mTwo = {};
+	mTwo.next = &mOne;
+	mTwo.size = 20;
+	mTwo.free = TRUE;
+
+	Metadata mThree = {};
+	mThree.next = &mTwo;
+	mThree.size = 40;
+	mThree.free = TRUE;
+
+	insertBlock(&mOne);
+	insertBlock(&mTwo);
+	insertBlock(&mThree);
+
+	int expSize = mThree.size + mTwo.size + METADATA_SIZE;
+	void* expNext = &mOne;
+
+	// act
+	Metadata* result = joinRegion(&mThree, &mTwo);
+
+	// assert
+	munit_assert_int(result->size, ==, expSize);
+	munit_assert_ptr_equal(result->next, expNext);
+
+	return MUNIT_OK;
+
 }
 
 /**********************************/
@@ -294,6 +341,22 @@ static MunitTest tests[] = {
 	{
 		"test-deallocMemory-freesBlockAssociatedWithPointer",
 		test_deallocMemory_freesBlockAssociatedWithPointer,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"test_allocMemory_returnsNullWhenSizeLessThanOne",
+		test_allocMemory_returnsNullWhenSizeLessThanOne,
+		NULL,
+		NULL,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"test_joinRegion_combinesTwoValidFreeMemoryRegionsIntoOne",
+		test_joinRegion_combinesTwoValidFreeMemoryRegionsIntoOne,
 		NULL,
 		NULL,
 		MUNIT_TEST_OPTION_NONE,

@@ -8,12 +8,23 @@
 #include "memory_internal.h"
 #include "type.h"
 
+/**
+ * TODO: 
+ *  - deallocMemory needs memory coalescing to prevent the memory pool from getting fragmented and unusable 
+ *  - deallocMemory needs to ensure pointer being freed lies within the bounds of a memory block 
+ *  - deallocMemory needs to check if pointer being passed in is NULL, a NULL pointer cannot be freed
+ *  - globalPool needs two lists, a list of allocated memory and a freelist to keep track of free memory regions. This will improve performance
+ *  - allocMemory needs to hanle errors properly, currently it does nothing when errors are thrown from mmap
+ *  - allocMemory and deallocMemory do not support multithreading/asynchronous programming
+ *  - (Maybe) joinRegion may need to start with copies of A and B to ensure it can revert if error occurs
+ */
+
 MemoryPool globalPool = { };
 
-/**
- * TODO: Keep a separate list of free blocks of memory? Will it make searching faster? 
- * TODO: Could verify memory pool is accurate before returing to ensure memory integrity. This might be worth it because the entire programs memory is stored in this memory pool.
- */
+/** ************************************************************************************************************************************ */
+/** Internal Functions **/
+/** ************************************************************************************************************************************ */
+
 Metadata* splitRegion(Metadata* region, size_t size) {
     // 1. Verify region != NULL
     if (region == NULL) {
@@ -47,19 +58,17 @@ Metadata* splitRegion(Metadata* region, size_t size) {
     return region;
 }
 
-/**
- * Search the `data` memory list for a block that best fits the size requirement.
- * 
- * The search function uses a best fit algorithm to find a size that is the closest to the desired size. The 
- * memory block will always be greater than or equal to the desired size. It will never be smaller than the desired size. 
- * 
- * @param size The size of memory required in bytes. Size must be greater than 0. 
- * @return A pointer to the start of the memory block satisfies the size criteria. If a memory block that matches the size criteria
- * cannot be found, NULL is returned. 
- */
-/**
- * TODO: This is a naive implementation and can be improved
- */
+Metadata* joinRegion(Metadata* a, Metadata* b) {
+    if (a == NULL || b == NULL)
+    {
+        return NULL;
+    }
+
+    a->size += (b->size + METADATA_SIZE);
+    a->next = b->next;
+    return a;
+}
+
 Metadata* search(size_t size) {
 
     if (size < 1) {
@@ -89,15 +98,6 @@ Metadata* search(size_t size) {
     return block;
 }
 
-/**
- * Inserts a block of memory into the memory block list. 
- * 
- * The block of memory is always inserted at the end of the linked list. 
- * TODO: Not optimal and should be improved. 
- * 
- * @param block The block of memory to insert. Parameter cannot be NULL. If parameter is NULL, -1 is returned from function. 
- * @return 0 if insertion was successful. If insertion failed, a value less than 0 is returned. 
- */
 int insertBlock(Metadata* block) {
 
     if (block == NULL) return -1;
@@ -119,11 +119,10 @@ int insertBlock(Metadata* block) {
     return 0;
 }
 
-/**
- * TODO:
- * 	- Determine if free memory exists and calling to system is required
- * 	- Split memory regions using a memory algorithm if free memory exists that is too large
- */
+/** ************************************************************************************************************************************ */
+/** External Functions **/
+/** ************************************************************************************************************************************ */
+
 void* allocMemory(size_t size) {
 
     if (size < 1) {
@@ -131,9 +130,6 @@ void* allocMemory(size_t size) {
     }
 
     // 1. Determine the proper size to allocate by aligning size to ALIGNMENT boundaries 
-    /**
-     * TODO: Need to error out if max memory size allowed to be requested is exceeded
-     */
     size_t memorySize = size + sizeof(Metadata);
     size_t alignedSize = align(memorySize, ALIGNMENT);
 
@@ -158,6 +154,9 @@ void* allocMemory(size_t size) {
         memory = mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
         if (memory == MAP_FAILED) 
         {
+            /**
+             * TODO: Need to set error code that user can access
+             */
             switch(errno) {
                 case EINVAL: // len not greater than 0
                 {
@@ -165,7 +164,7 @@ void* allocMemory(size_t size) {
                 case EMFILE: // limit on mapped regions per process is exceeded
                 {
                 } break;
-                case ENOMEM: // insufficient memory available 
+                case ENOMEM: // insufficient memory available or exceeded resource limit
                 {
                 } break;
             }
@@ -195,12 +194,6 @@ void* allocMemory(size_t size) {
     return usrMemory;
 }
 
-/**
- * TODO: Need error handling
- * TODO: Need to ensure that pointer math lands on Metadata header, if not, then user did not pass valid pointer
- * TODO: Need to add memory coalescing to merge adjacent free blocks back together on free
- * TODO: Need to validate that ptr actually lies within memory pool and is not outside the bounds 
- */
 void deallocMemory(void* ptr) {
     // Convert to byte for pointer arithmatic 
     Metadata* temp = (Metadata*)ptr;
@@ -210,4 +203,10 @@ void deallocMemory(void* ptr) {
 
     // Free block of memory
     temp->free = TRUE;
+
+    // Check if next block is also free, if so combine into one single free region
+    if (temp->next->free == TRUE)
+    {
+        joinRegion(temp, temp->next);
+    }
 }

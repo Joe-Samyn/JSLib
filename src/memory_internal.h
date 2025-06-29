@@ -46,16 +46,12 @@
  * @return A pointer to the start of the memory block satisfies the size criteria. If a memory block that matches the size criteria
  * cannot be found, NULL is returned. 
  */
-/**
- * TODO: This is a naive implementation and can be improved
- */
 Metadata* search(size_t size);
 
 /**
  * Inserts a block of memory into the memory block list. 
  * 
  * The block of memory is always inserted at the end of the linked list. 
- * TODO: Not optimal and should be improved. 
  * 
  * @param block The block of memory to insert. Parameter cannot be NULL. If parameter is NULL, -1 is returned from function. 
  * @return 0 if insertion was successful. If insertion failed, a value less than 0 is returned. 
@@ -87,5 +83,17 @@ int insertBlock(Metadata* block);
  *         On failure: NULL and original region is preserved in pool. 
  */
 Metadata* splitRegion(Metadata* region, size_t size);
+
+/**
+ * Combines two memory regions into a single memory region by merging the memory pointed to by b into the 
+ * memory region pointed to by a. The size of the new memory region is equal to  a->size + b->size + METADATA_SIZE 
+ * because the Metadata region is no longer needed for b. 
+ * 
+ * @param a A pointer to the first memory region to combine. 
+ * @param b A pointer to the second memory region to combine.
+ * @return A pointer to the joined memory region. If error occurs during join operation, NULL is returned and 
+ * both memory regions are reverted to initial state. 
+ */
+Metadata* joinRegion(Metadata* a, Metadata* b);
 
 #endif
