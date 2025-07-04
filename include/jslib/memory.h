@@ -81,4 +81,16 @@ void* allocMemory(size_t size);
  */
 void deallocMemory(void* ptr);
 
+/* ================ Buddy Allocator Interface ================== */
+/**
+ * Initializes a buddy allocator. 
+ * 
+ * @param size The amount of mem
+ */
+void buddyInit(size_t size, int minOrder);
+
+void buddyAlloc(size_t size);
+
+void buddyFree(void* ptr);
+
 #endif
