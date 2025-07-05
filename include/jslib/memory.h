@@ -25,6 +25,7 @@ typedef struct {
  */
 extern MemoryPool globalPool;
 
+/* =============== Generic Memory Operations ======================= */
 /**
  * Copies data from a source memory region into destination memory region
  * 
@@ -50,47 +51,34 @@ void* memoryCopy(void* dest, const void* src, size_t n);
  */
 void* memorySet(void* dest, unsigned char value, size_t n);
 
-/**
- * Allocate a block of memory that is at least `size` in bytes. Memory is uninitialized on allocation.
- * Memory returned is always aligned to the largest type on the platform. The alignment is determined
- * by the ALIGNMENT macro. 
- * 
- * @note The allocator will use the "best fit" algorithm to search for a memory block that matches the size
- * being requested. This is not the most optimal and could lead to higher fragmentation depending on how
- * the allocator is used. This is an initial MVP implementation and will be optiomized.
- * 
- * TODO: This current implementation is NOT thread safe.
- * TODO: This implementation will only work on OSX, it needs to be ported to Linux and Windows 
- * 
- * @param size The size in bytes of the required memory region. Size must be greater than 0. If
- * 0 is provided, a NULL pointer is returned. 
- * @return A pointer to the allocated memory block matching the size requirement. The returned 
- * block will be greater than or equal to the requested size. A NULL pointer is returned on 
- * failure to allocate memory. 
- */
-void* allocMemory(size_t size);
-
-/**
- * Deallocate a block of memory pointed to by ptr. When memory is deallocated, it is coalesced 
- * with neighboring free memory blocks. This function does not release memory back to the operating 
- * system. 
- * 
- * @param ptr A pointer to the memory region that is to be deallocated. It must not be null
- * and it must point to the original pointer returned from allocMemory. Memory will not be deallocated
- * if the pointer does not point to a valid memory region and deallocation will request will be ignored. 
- */
-void deallocMemory(void* ptr);
-
 /* ================ Buddy Allocator Interface ================== */
 /**
- * Initializes a buddy allocator. 
+ * Initializes a global buddy allocator that manages 2^(maxOrder) bytes of memory. The global allocator
+ * object is entirely managed by the JSLib library and is meant to be used for simple programs. Custom buddy 
+ * allocators are created using the `buddyInitCustom` function. 
  * 
- * @param size The amount of mem
+ * @param maxOrder The maximum order of memory this buddy allocator will manage. The resulting size is proportional to size
+ * 2 to the order of maxOrder (i.e. 2^(maxOrder))
+ * @return SUCCESS is returned when initialization is successful. ERROR is returned when an error occurred during initialization 
+ * and a global buddy allocator could not be created. 
  */
-void buddyInit(size_t size, int minOrder);
+int buddyInitGlobal(size_t maxOrder);
 
-void buddyAlloc(size_t size);
+/**
+ * Allocate a block that is greater than or equal to the `requestedSize`. The allocator searches the list of free blocks 
+ * for smallest block that can satisfy the request (i.e. >= requestedSize). Larger memory blocks are continually divided in half until the closest 
+ * size block that is greater than `requestedSize` is achieved. The full allocation algorithm can be reviewed here: <add link>
+ * 
+ * @param requestSize The size of memory to allocate. Size will be rounded up to the nearest power of 2 if it is not a power of 2. 
+ * @return A pointer to the start of the memory region is returned on successful allocation. NULL is returned 
+ * if allocation fails. In this case, the global errorCode variable is set to indicate the failure reason.
+ */
+void* buddyAlloc(size_t requestedSize);
 
+/**
+ * Deallocates the block of memory referenced by `ptr`. Upon deallocation, if a blocks buddy is also free, the two blocks
+ * are rejoined to form a single free block of memory. This is done to reduce memory fragmentation. 
+ */
 void buddyFree(void* ptr);
 
 #endif

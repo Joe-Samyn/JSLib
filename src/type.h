@@ -6,7 +6,9 @@
 #define byte char
 
 #define TRUE 1
-#define FALSE 0 
+#define FALSE 0
+#define ERROR -1
+#define SUCCESS 1 
 
 /**
  * This file contains all memory related operations such as copying memory, allocating memory,
