@@ -11,22 +11,14 @@
 #define SUCCESS 1 
 
 /**
- * This file contains all memory related operations such as copying memory, allocating memory,
- * duplicating memory, freeing memory, etc. 
+ * Represents the header of a memory block. The header contains information about the block such as
+ * size of the block, whether the block is free or not, and a pointer to the next contiguous block 
+ * of memory.
  */
-typedef struct Metadata {
-    /**
-     * Pointer to the next block of memory
-     */
-    struct Metadata* next;
-    /**
-     * Size in bytes of the memory region 
-     */
-    size_t size;
-    /**
-     * Flag indicating if memory is free or in use
-     */
+struct Header {
+    int size;
     int free;
-} Metadata;
+    struct Header* next;
+};
 
 #endif

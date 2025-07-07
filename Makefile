@@ -25,10 +25,11 @@ TEST_TARGET := ${BUILD_DIR}/test.exe
 
 # Files
 SRC_FILES := ${SRC_DIR}/string.c \
-			${SRC_DIR}/memory_macos.c
+			${SRC_DIR}/osx_memory.c \
+			${SRC_DIR}/math.c
 
 TEST_FILES := ${TESTS_DIR}/string_tests.c \
-		  ${TESTS_DIR}/memory_macos_tests.c \
+		  ${TESTS_DIR}/osx_memory_tests.c \
 	      ${TESTS_DIR}/munit.c \
 	      ${TESTS_DIR}/test_runner.c
 

@@ -5,5 +5,8 @@
             "binaryPath": "/Users/joey/Projects/SystemsProgramming/JSLib/build/test.exe",
             "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "mman.h": "c"
+    }
 }

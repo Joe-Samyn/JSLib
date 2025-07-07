@@ -12,18 +12,18 @@
 /**
  * An object that represents a memory pool. 
  */
-typedef struct {
+struct BuddyAllocator {
     /**
      * Root node of the memory pool
      */
-    Metadata* root;
-} MemoryPool;
+    struct Header* root;
+};
 
 /**
  * A pointer to the head of the list of memory blocks
  * TODO: Maybe look into a memory pool system that can support multiple allocators such as MemoryPool object
  */
-extern MemoryPool globalPool;
+extern struct BuddyAllocator globalBuddyAllocator;
 
 /* =============== Generic Memory Operations ======================= */
 /**
@@ -53,9 +53,13 @@ void* memorySet(void* dest, unsigned char value, size_t n);
 
 /* ================ Buddy Allocator Interface ================== */
 /**
- * Initializes a global buddy allocator that manages 2^(maxOrder) bytes of memory. The global allocator
+ * Initializes a global buddy allocator that manages 2^(maxOrder) bytes of memory. The result of 2^(maxOrder) is aligned (rounded up) to the 
+ * next largest page size. This ensures memory is requested from the OS in page multiples. The global allocator
  * object is entirely managed by the JSLib library and is meant to be used for simple programs. Custom buddy 
  * allocators are created using the `buddyInitCustom` function. 
+ * 
+ * @note Currently the Global Buddy Allocator is not thread safe, meaning there is no protection against accessing the allocator
+ * from multiple threads simultaneously. Thread safety will be coming in a future update.
  * 
  * @param maxOrder The maximum order of memory this buddy allocator will manage. The resulting size is proportional to size
  * 2 to the order of maxOrder (i.e. 2^(maxOrder))
@@ -69,6 +73,9 @@ int buddyInitGlobal(size_t maxOrder);
  * for smallest block that can satisfy the request (i.e. >= requestedSize). Larger memory blocks are continually divided in half until the closest 
  * size block that is greater than `requestedSize` is achieved. The full allocation algorithm can be reviewed here: <add link>
  * 
+ * @note Currently the Global Buddy Allocator is not thread safe, meaning there is no protection against accessing the allocator
+ * from multiple threads simultaneously. Thread safety will be coming in a future update.
+ * 
  * @param requestSize The size of memory to allocate. Size will be rounded up to the nearest power of 2 if it is not a power of 2. 
  * @return A pointer to the start of the memory region is returned on successful allocation. NULL is returned 
  * if allocation fails. In this case, the global errorCode variable is set to indicate the failure reason.
@@ -76,8 +83,12 @@ int buddyInitGlobal(size_t maxOrder);
 void* buddyAlloc(size_t requestedSize);
 
 /**
- * Deallocates the block of memory referenced by `ptr`. Upon deallocation, if a blocks buddy is also free, the two blocks
- * are rejoined to form a single free block of memory. This is done to reduce memory fragmentation. 
+ * Deallocates the block of memory referenced by `ptr`. During deallocation, if an adjecent memory block is also free, the two blocks (the block ptr resides in
+ * and the free adjacent block) are joined into a single block of free memory. If `ptr` does not point to a valid block of memory that was allocated by the global
+ * buddy allocator, then no deallocations occur and the block of memory is untouched. 
+ * 
+ * @param ptr A pointer to the block of memory to be deallocated. A ptr must point to a valid block of memory that was allocated by the global buddy allocator
+ * and it cannot be NULL. 
  */
 void buddyFree(void* ptr);
 
