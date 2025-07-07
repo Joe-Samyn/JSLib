@@ -32,7 +32,7 @@ of 2^2 = 4 bytes.
 #endif
 
 // Size of the metadata block
-#define HEADER_SIZE sizeof(Header)
+#define HEADER_SIZE sizeof(struct Header)
 
 
 /**

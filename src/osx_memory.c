@@ -17,6 +17,7 @@
 
 
 struct BuddyAllocator globalBuddyAllocator = { };
+int errorCode = NO_ERR;
 
 /** ************ Internal Functions ************* */
 
@@ -24,18 +25,34 @@ struct BuddyAllocator globalBuddyAllocator = { };
 /** ************ External Functions ************* */
 int buddyInitGlobal(size_t maxOrder) {
 
-    // TODO (joe): Check if globalBuddyAllocator has already been initialized
-    // For now, we are going to always assume it hasn't been initialized
-    int allocatorSize = power(2, maxOrder);
+    // Check if global buddy allocator has already been initialized
+    if (globalBuddyAllocator.root != 0x0) 
+    {
+        errorCode = PREV_INIT;
+        return ERROR;
+    }
+
+    // Ensure maxOrder is valid before proceeding to mmap call
+    if (maxOrder <= 0) 
+    {
+        errorCode = INVAL_ARG;
+        return ERROR;
+    }
+
+    // We must add HEADER_SIZE here or the user may end up with less memory than they were expecting
+    int allocatorSize = power(2, maxOrder) + HEADER_SIZE;
     size_t pageSize = sysconf(_SC_PAGE_SIZE);
     int size = align(allocatorSize, pageSize);
 
+    // size cannot and should not be 0 here. If size is 0, there is a bug
+    assert(size != 0);
+
     void* memory = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     
+    // If we get here, something else failed that the user has no control over. Let them know an OS level error occurred with the library
     if (memory == MAP_FAILED)
     {
-        // TODO (joe): Handle failure gracefully
-        int error = errno;
+        errorCode = OS_ERR;
         return ERROR;
     }
 

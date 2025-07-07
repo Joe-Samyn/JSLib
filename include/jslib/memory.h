@@ -6,6 +6,28 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+/* Error Codes */
+/**
+ * No error currently exists 
+ */
+#define NO_ERR 0
+
+/**
+ * Allocator was previously initialized and cannot be reinitialized
+ */
+#define PREV_INIT 1
+
+/**
+ * An argument passed to the function was invalid
+ */
+#define INVAL_ARG 2
+
+/**
+ * An internal error occurred when trying to call OS level functions like mmap, sbrk, etc.
+ */
+#define OS_ERR 3
+
+
 /** 
     TODO: Add errorCode property that is set when error occurs. Maybe make it a queue and pop the most recent error code off the queue? 
 */
@@ -24,6 +46,8 @@ struct BuddyAllocator {
  * TODO: Maybe look into a memory pool system that can support multiple allocators such as MemoryPool object
  */
 extern struct BuddyAllocator globalBuddyAllocator;
+
+extern int errorCode;
 
 /* =============== Generic Memory Operations ======================= */
 /**
