@@ -27,6 +27,11 @@
  */
 #define OS_ERR 3
 
+/**
+ * The allocator is out of available memory.
+ */
+#define NO_MEM 4
+
 
 /** 
     TODO: Add errorCode property that is set when error occurs. Maybe make it a queue and pop the most recent error code off the queue? 

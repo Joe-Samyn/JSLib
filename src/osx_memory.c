@@ -20,6 +20,53 @@ struct BuddyAllocator globalBuddyAllocator = { };
 int errorCode = NO_ERR;
 
 /** ************ Internal Functions ************* */
+/**
+ * TODO: Clean up this documentation
+ * Searches for a block of memory whose size is at least `requestedSize` in bytes (i.e. size >= requestedSize). The search algorithm
+ * will perform repeated splits on blocks of memory if `requestedSize` is less than half the size of the best fit block (i.e. requestedSize <= block.size / 2).
+ * The total size of the memory block found is equal to `requestedSize` + `HEADER_SIZE` to ensure there is enough space for header data and user data. 
+ * 
+ * @param requestedSize The desired size of the memory block.
+ * @return A pointer to the header (or start) of the block of memory 
+ */
+void* search(size_t requestedSize) {
+
+    // requestedSize must be greater than 0 to get a valid memory region
+    if (requestedSize <= 0) 
+    {
+        errorCode = INVAL_ARG;
+        return NULL;
+    }
+
+    // Linearly search linked list for now. 
+    // TODO: This is not a good solution. We need a freelist implementation, preferable using a self balancing tree to make 
+    // free memory lookups fast: O(lg(n)) time
+    struct Header* node = globalBuddyAllocator.root;
+    struct Header* bestFit = NULL;
+    while (node != NULL) 
+    {
+        // TODO: Fix these conditionals, too confusing and complicated
+        if (node->free)
+        {
+            if (bestFit == NULL || (node->size > requestedSize && node->size < bestFit->size))
+            {
+                bestFit = node;
+            }
+        }
+
+        node = node->next;
+    }
+
+    if (bestFit == NULL)
+    {   
+        errorCode = NO_MEM;
+        return NULL;
+    }
+    
+    // TODO: The node should then be split if it is too large to prevent waste of space
+
+    return bestFit;
+}
 
 
 /** ************ External Functions ************* */
@@ -70,3 +117,9 @@ int buddyInitGlobal(size_t maxOrder) {
     return SUCCESS;
 } 
 
+void* buddyAlloc(size_t requestedSize) {
+
+    void* memory = search(requestedSize);
+
+    return memory + HEADER_SIZE;
+}
