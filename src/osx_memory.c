@@ -106,7 +106,7 @@ int buddyInitGlobal(size_t maxOrder) {
     // Convert the mapped memory region to a header struct to store metadata about the 
     // newly obtained block of memory
     struct Header* header = (struct Header*)memory;
-    header->size = allocatorSize;
+    header->size = size;
     header->free = TRUE;
     header->next = NULL;
 

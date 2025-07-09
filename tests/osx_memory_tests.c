@@ -56,7 +56,31 @@ static MunitResult test_buddyInitGlobal_failsWithErrorWhenMaxOrderZeroOrLess(con
 	return MUNIT_OK;
 }
 
+static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitParameter params[], void* fixture)
+{
+	// Arrange
+	int initSize = 5;
+	buddyInitGlobal(initSize);
+
+	int expSize = 10;
+
+	// Act
+	void* result = buddyAlloc(expSize);
+	struct Header* header = ((struct Header*)(result - HEADER_SIZE));
+	int resultSize = header->size;
+
+	// Assert
+	munit_assert_ptr_not_null(result);
+	munit_assert_int(resultSize, >=, expSize);
+}
+
 /* =========== memory_internal.h Tests ============== */
+
+/* =========== Setup & Tear Down Functions =============== */
+static void tearDownGlobalBuddyAlloc(void* fixture) 
+{
+	globalBuddyAllocator = (struct BuddyAllocator){0};
+}
 
 /**********************************/
 
@@ -65,7 +89,7 @@ static MunitTest tests[] = {
 		"/test-buddyInitGlobal-initializesGlobalBuddyAllocator",
 		test_buddyInitGlobal_initializesGlobalBuddyAllocator,
 		NULL,
-		NULL,
+		tearDownGlobalBuddyAlloc,
 		MUNIT_TEST_OPTION_NONE,
 		NULL
 	},
@@ -73,7 +97,7 @@ static MunitTest tests[] = {
 		"/test-buddyInitGlobal-initializesGlobalBuddyAllocatorOnlyOnce",
 		test_buddyInitGlobal_initializesGlobalBuddyAllocatorOnlyOnce,
 		NULL,
-		NULL,
+		tearDownGlobalBuddyAlloc,
 		MUNIT_TEST_OPTION_NONE,
 		NULL
 	},
@@ -81,10 +105,18 @@ static MunitTest tests[] = {
 		"/test-buddyInitGlobal-failsWithErrorWhenMaxOrderZeroOrLess",
 		test_buddyInitGlobal_failsWithErrorWhenMaxOrderZeroOrLess,
 		NULL,
-		NULL,
+		tearDownGlobalBuddyAlloc,
 		MUNIT_TEST_OPTION_NONE,
 		NULL
 
+	},
+	{
+		"/test-buddyAlloc-returnsPtrToMemoryWithProperSize",
+		test_buddyAlloc_returnsPtrToMemoryWithProperSize,
+		NULL,
+		tearDownGlobalBuddyAlloc,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
 	},
 	// Required to end array with null terminating entry b/c otherwise munit seg faults
 	{ NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
