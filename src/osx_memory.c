@@ -120,6 +120,10 @@ int buddyInitGlobal(size_t maxOrder) {
 void* buddyAlloc(size_t requestedSize) {
 
     void* memory = search(requestedSize);
+    if (!memory)
+    {
+        return NULL;
+    }
 
     return memory + HEADER_SIZE;
 }

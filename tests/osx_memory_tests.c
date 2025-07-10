@@ -74,6 +74,23 @@ static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitP
 	munit_assert_int(resultSize, >=, expSize);
 }
 
+static MunitResult test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize(const MunitParameter params[], void* fixture)
+{
+	// Arrange
+	int initSize = 5;
+	buddyInitGlobal(initSize);
+
+	int size = 0;
+
+	// Act
+	void* result = buddyAlloc(size);
+
+	// Assert
+	munit_assert_ptr_null(result);
+	munit_assert_int(errorCode, ==, INVAL_ARG);
+
+}
+
 /* =========== memory_internal.h Tests ============== */
 
 /* =========== Setup & Tear Down Functions =============== */
@@ -113,6 +130,14 @@ static MunitTest tests[] = {
 	{
 		"/test-buddyAlloc-returnsPtrToMemoryWithProperSize",
 		test_buddyAlloc_returnsPtrToMemoryWithProperSize,
+		NULL,
+		tearDownGlobalBuddyAlloc,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"/test-buddyAlloc-returnsNullAndSetsErrorWhenInvalidSize",
+		test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize,
 		NULL,
 		tearDownGlobalBuddyAlloc,
 		MUNIT_TEST_OPTION_NONE,
