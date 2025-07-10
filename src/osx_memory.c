@@ -119,6 +119,7 @@ int buddyInitGlobal(size_t maxOrder) {
 
 void* buddyAlloc(size_t requestedSize) {
 
+    // TODO: We can probably use a ternary here and potentially a conditional data move which would result in better branch prediction 
     void* memory = search(requestedSize);
     if (!memory)
     {
