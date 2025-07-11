@@ -20,6 +20,24 @@ struct BuddyAllocator globalBuddyAllocator = { };
 int errorCode = NO_ERR;
 
 /** ************ Internal Functions ************* */
+
+/**
+ * Recursively splits a block of memory in half until the size of the block is at least `requestedSize`.
+ * DRAFT: This function will recursively split the chunk until it gets a size in bytes that is at least `requestedSize`. The resulting size will be >= `requestedSize`. 
+ * Continually dividing by two allows the memory to stay aligned to system requirements. The smallest size a chunk can be split down to is `requestedSize` + HEADER_SIZE
+ * rounded up to the next power of 2. The two halves that result from a split are associated to each other as 'buddies', meaning the chunks point to each other. This allows 
+ * us to look for potential regions to join back together and coalesce memory when memory is freed. 
+ * 
+ * @param chunk The chunk of memory to reduce down to the desired size by continually dividing it by two. 
+ * @param requestedSize The desired size in bytes 
+ * @returns A pointer to the memory block whose size in bytes is greater than or equal to `requestedSize`. If no block is found, NO_MEM is set as the global error code and NULL
+ * is returned.
+ */
+static struct Header* split(struct Header* chunk, size_t requestedSize)
+{
+
+}
+
 /**
  * TODO: Clean up this documentation
  * Searches for a block of memory whose size is at least `requestedSize` in bytes (i.e. size >= requestedSize). The search algorithm
@@ -29,7 +47,7 @@ int errorCode = NO_ERR;
  * @param requestedSize The desired size of the memory block.
  * @return A pointer to the header (or start) of the block of memory 
  */
-void* search(size_t requestedSize) {
+static void* search(size_t requestedSize) {
 
     // requestedSize must be greater than 0 to get a valid memory region
     if (requestedSize <= 0) 
