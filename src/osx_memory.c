@@ -45,10 +45,15 @@ void* search(size_t requestedSize) {
     struct Header* bestFit = NULL;
     while (node != NULL) 
     {
-        // TODO: Fix these conditionals, too confusing and complicated
+        // TODO: When a freelist is implemented, bestFit can be set to the root free node and the NULL check will not be required
         if (node->free)
         {
-            if (bestFit == NULL || (node->size > requestedSize && node->size < bestFit->size))
+            // NOTE: This NULL check will go away once a freelist is implemented
+            if (bestFit == NULL)
+            {
+                bestFit = node;
+            }
+            else if (node->size > requestedSize && node->size < bestFit->size)
             {
                 bestFit = node;
             }
@@ -121,10 +126,5 @@ void* buddyAlloc(size_t requestedSize) {
 
     // TODO: We can probably use a ternary here and potentially a conditional data move which would result in better branch prediction 
     void* memory = search(requestedSize);
-    if (!memory)
-    {
-        return NULL;
-    }
-
-    return memory + HEADER_SIZE;
+    return memory ? memory + HEADER_SIZE : memory;
 }
