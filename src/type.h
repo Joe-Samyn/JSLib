@@ -16,9 +16,10 @@
  * of memory.
  */
 struct Header {
-    int size;
-    int free;
+    unsigned int size;
+    unsigned int free;
     struct Header* next;
+    struct Header* prev;
 };
 
 #endif

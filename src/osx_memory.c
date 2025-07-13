@@ -35,7 +35,31 @@ int errorCode = NO_ERR;
  */
 static struct Header* split(struct Header* chunk, size_t requestedSize)
 {
+    // Recursion break condition
+    if ((requestedSize + HEADER_SIZE) >= (chunk->size / 2))
+    {
+        return chunk;
+    }
 
+    unsigned int memorySize = chunk->size + HEADER_SIZE;
+    void* memory = (void*)chunk;
+
+    // Split the chunk in half
+    unsigned int newMemorySize = memorySize / 2;
+    void* newChunk = memory + newMemorySize;
+    
+    // Create new buddy node
+    struct Header* buddy = (struct Header*)newChunk;
+    buddy->size = newMemorySize - HEADER_SIZE;
+    buddy->free = TRUE;
+    buddy->next = chunk->next;
+    buddy->prev = chunk;
+
+    // Update existing chunk to new size and attach its buddy
+    chunk->size = newMemorySize - HEADER_SIZE;
+    chunk->next = buddy;
+
+    return split(chunk, requestedSize);
 }
 
 /**
@@ -86,7 +110,9 @@ static void* search(size_t requestedSize) {
         return NULL;
     }
     
-    // TODO: The node should then be split if it is too large to prevent waste of space
+
+    if (requestedSize < (bestFit->size / 2)) 
+        bestFit = split(bestFit, requestedSize);
 
     return bestFit;
 }
@@ -129,7 +155,7 @@ int buddyInitGlobal(size_t maxOrder) {
     // Convert the mapped memory region to a header struct to store metadata about the 
     // newly obtained block of memory
     struct Header* header = (struct Header*)memory;
-    header->size = size;
+    header->size =  size - HEADER_SIZE;
     header->free = TRUE;
     header->next = NULL;
 

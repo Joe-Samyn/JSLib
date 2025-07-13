@@ -4,6 +4,7 @@
 #include "type.h"
 
 #include <unistd.h>
+#include <math.h>	// TODO: Write own log function 
 
 
 /* =========== memory.h Tests ============ */
@@ -62,16 +63,19 @@ static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitP
 	int initSize = 5;
 	buddyInitGlobal(initSize);
 
-	int expSize = 10;
+	int size = 10;
+	int expSize = 40;
 
 	// Act
-	void* result = buddyAlloc(expSize);
+	void* result = buddyAlloc(size);
 	struct Header* header = ((struct Header*)(result - HEADER_SIZE));
 	int resultSize = header->size;
 
 	// Assert
 	munit_assert_ptr_not_null(result);
-	munit_assert_int(resultSize, >=, expSize);
+	munit_assert_int(resultSize, ==, expSize);
+
+	return MUNIT_OK;
 }
 
 static MunitResult test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize(const MunitParameter params[], void* fixture)
@@ -89,6 +93,34 @@ static MunitResult test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize(const 
 	munit_assert_ptr_null(result);
 	munit_assert_int(errorCode, ==, INVAL_ARG);
 
+	return MUNIT_OK;
+}
+
+// TODO: This test wil
+static MunitResult test_buddyAlloc_splitsMemoryCorrectNumberOfTimes(const MunitParameter params[], void* fixture)
+{
+	// Arrange
+	int initSize = 5;
+	buddyInitGlobal(initSize);
+
+	int size = 10;
+	int expMemorySize = 40;
+	int expNodes = (int)floor(log2(sysconf(_SC_PAGE_SIZE) / expMemorySize));
+
+	// Act
+	void* memory = buddyAlloc(size);
+	int nodes = 0;
+	struct Header* node = globalBuddyAllocator.root;
+	while (node->next)
+	{
+		nodes++;
+		node = node->next;
+	}
+
+	// Assert
+	munit_assert_int(nodes, ==, expNodes);
+
+	return MUNIT_OK;
 }
 
 /* =========== memory_internal.h Tests ============== */
@@ -138,6 +170,14 @@ static MunitTest tests[] = {
 	{
 		"/test-buddyAlloc-returnsNullAndSetsErrorWhenInvalidSize",
 		test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize,
+		NULL,
+		tearDownGlobalBuddyAlloc,
+		MUNIT_TEST_OPTION_NONE,
+		NULL
+	},
+	{
+		"/test-buddyAlloc-splitsMemoryCorrectNumberOfTimes",
+		test_buddyAlloc_splitsMemoryCorrectNumberOfTimes,
 		NULL,
 		tearDownGlobalBuddyAlloc,
 		MUNIT_TEST_OPTION_NONE,
