@@ -16,8 +16,20 @@
  * of memory.
  */
 struct Header {
+    /**
+     * Size in bytes of the user space (excluding header)
+     */
     unsigned int size;
+    /**
+     * A flag indicating whether the block of memory is free or allocated
+     */
     unsigned int free;
+    /**
+     * Order of the entire memory chunk (not excluding header)
+     */
+    unsigned int order;
+
+    /* optional and will be removed */
     struct Header* next;
     struct Header* prev;
 };

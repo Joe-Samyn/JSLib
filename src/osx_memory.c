@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "memory_internal.h"
 #include "type.h"
@@ -158,6 +159,7 @@ int buddyInitGlobal(size_t maxOrder) {
     header->size =  size - HEADER_SIZE;
     header->free = TRUE;
     header->next = NULL;
+    header->order = log2(size);
 
     // Initialize the global allocator with the starting address of the newly mapped memory region
     globalBuddyAllocator.root = header;

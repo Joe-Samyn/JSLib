@@ -1,0 +1,13 @@
+- [ ] Store order of a block in the header
+- [ ] HEADER_SIZE needs to be rounded up to the closed multiple of 2 for the buddy allocator
+- [ ] Store entire block size in header (not just user space size)
+- [ ] Ensure blocks are multiples of 2 when they are split using assert
+- [ ] Always zero out headers when initializing a new chunk of memory 
+- [ ] Use size_t when calculating sizes instead of int 
+- [ ] Add support for user defined allocators (currently we just support global)
+- [ ] Use a bitmap instead of a linked-list to store allocation status? (How to use bitmap for this?)
+- [ ] Build a visualizer in Python to visual memory splitting and current allocations 
+- [ ] Add threading support to allow access from multiple threads
+- [ ] Add support for per thread memory pools so we don't have to lock a single pool
+- [ ] We don't need to maintain pointers to links in the memory pool. Buddy allocators allow this to be calculated very easy by using the order to get the next 
+block in the memory region: current block + 2^(order)
