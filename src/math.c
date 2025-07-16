@@ -1,8 +1,10 @@
 #include "math.h"
 
-int power(long base, long exponent) {
+int power(long base, long exponent)
+{
     int result = base;
-    while(exponent != 0) 
+    exponent -= 1;
+    while (exponent > 0)
     {
         result *= base;
         exponent--;
