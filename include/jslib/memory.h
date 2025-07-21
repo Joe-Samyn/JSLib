@@ -44,6 +44,15 @@ struct BuddyAllocator {
      * Root node of the memory pool
      */
     struct Header* root;
+    /**
+     * Order of the entire memory block managed by this allocator
+     */
+    size_t order;
+
+    /**
+     * The end address of the memory region
+     */
+    void* end;
 };
 
 /**

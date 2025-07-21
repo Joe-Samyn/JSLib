@@ -51,12 +51,9 @@ static struct Header *split(struct Header *chunk, size_t requestedSize)
     struct Header *buddy = (struct Header *)newChunk;
     buddy->size = newMemorySize - HEADER_SIZE;
     buddy->free = TRUE;
-    // buddy->next = chunk->next;
-    // buddy->prev = chunk;
 
     // Update existing chunk to new size and attach its buddy
     chunk->size = newMemorySize - HEADER_SIZE;
-    // chunk->next = buddy;
 
     return split(chunk, requestedSize);
 }
@@ -163,6 +160,8 @@ int buddyInitGlobal(size_t maxOrder)
 
     // Initialize the global allocator with the starting address of the newly mapped memory region
     globalBuddyAllocator.root = header;
+    globalBuddyAllocator.order = header->order;
+    globalBuddyAllocator.end = ((void*)globalBuddyAllocator.root) + size;
 
     // Initialization was successful if we reach this point
     return SUCCESS;
