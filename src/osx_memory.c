@@ -15,7 +15,7 @@
  *
  */
 
-struct BuddyAllocator globalBuddyAllocator = {};
+struct BuddyAllocator globalBuddyAllocator = { 0x0 };
 int errorCode = NO_ERR;
 
 /** ************ Internal Functions ************* */
@@ -40,20 +40,22 @@ static struct Header *split(struct Header *chunk, size_t requestedSize)
         return chunk;
     }
 
-    unsigned int memorySize = chunk->size + HEADER_SIZE;
-    void *memory = (void *)chunk;
+    void *memory = chunk;
 
-    // Split the chunk in half
-    unsigned int newMemorySize = memorySize / 2;
-    void *newChunk = memory + newMemorySize;
+    // Split the chunk in half, which can be achieved simply by subtracting 1 from the order
+    size_t newOrder = chunk->order - 1;
+    size_t newSize = power(2, newOrder);
+    void *newChunk = memory + newSize;
 
     // Create new buddy node
     struct Header *buddy = (struct Header *)newChunk;
-    buddy->size = newMemorySize - HEADER_SIZE;
+    buddy->size = newSize - HEADER_SIZE;
     buddy->free = TRUE;
+    buddy->order = newOrder;
 
     // Update existing chunk to new size and attach its buddy
-    chunk->size = newMemorySize - HEADER_SIZE;
+    chunk->size = newSize - HEADER_SIZE;
+    chunk->order = newOrder;
 
     return split(chunk, requestedSize);
 }
@@ -80,28 +82,28 @@ static void *search(size_t requestedSize)
     // Linearly search linked list for now.
     // TODO: This is not a good solution. We need a freelist implementation, preferable using a self balancing tree to make
     // free memory lookups fast: O(lg(n)) time
-    struct Header *node = globalBuddyAllocator.root;
-    struct Header *bestFit = NULL;
-    while (node != NULL)
+    void* node = globalBuddyAllocator.start;
+    struct Header* bestFit = NULL;
+    while (node < globalBuddyAllocator.end)
     {
+        struct Header* temp = (struct Header*)node;
+
         // TODO: When a freelist is implemented, bestFit can be set to the root free node and the NULL check will not be required
-        if (node->free)
+        if (temp->free)
         {
             // NOTE: This NULL check will go away once a freelist is implemented
             if (bestFit == NULL)
             {
                 bestFit = node;
             }
-            else if (node->size > requestedSize && node->size < bestFit->size)
+            else if (temp->size > requestedSize && temp->size < bestFit->size)
             {
-                bestFit = node;
+                bestFit = temp;
             }
         }
 
-        void* temp = (void*)node;
-        size_t next = power(2, node->order);
-        temp += next;
-        node = temp;
+        size_t next = power(2, temp->order);
+        node += next;
     }
 
     if (bestFit == NULL)
@@ -121,7 +123,7 @@ int buddyInitGlobal(size_t maxOrder)
 {
 
     // Check if global buddy allocator has already been initialized
-    if (globalBuddyAllocator.root != 0x0)
+    if (globalBuddyAllocator.start != 0x0)
     {
         errorCode = PREV_INIT;
         return ERROR;
@@ -159,9 +161,9 @@ int buddyInitGlobal(size_t maxOrder)
     header->order = log2(size); // NOTE: We aligned maxOrder up to the system page size, so we need to calculate the new maxOrder
 
     // Initialize the global allocator with the starting address of the newly mapped memory region
-    globalBuddyAllocator.root = header;
+    globalBuddyAllocator.start = header;
     globalBuddyAllocator.order = header->order;
-    globalBuddyAllocator.end = ((void*)globalBuddyAllocator.root) + size;
+    globalBuddyAllocator.end = globalBuddyAllocator.start + size;
 
     // Initialization was successful if we reach this point
     return SUCCESS;

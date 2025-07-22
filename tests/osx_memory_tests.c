@@ -63,7 +63,7 @@ static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitP
 	buddyInitGlobal(initSize);
 
 	int size = 10;
-	int expSize = 40;
+	int expSize = 20;
 
 	// Act
 	void *result = buddyAlloc(size);
@@ -109,7 +109,7 @@ static MunitResult test_buddyAlloc_splitsMemoryCorrectNumberOfTimes(const MunitP
 	// Act
 	void *memory = buddyAlloc(size);
 	int nodes = 0;
-	struct Header *node = globalBuddyAllocator.root;
+	struct Header *node = (struct Header*)globalBuddyAllocator.start;
 	// while (node->next)
 	// {
 	// 	nodes++;
