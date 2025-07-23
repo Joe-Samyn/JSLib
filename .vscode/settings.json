@@ -8,5 +8,6 @@
     ],
     "files.associations": {
         "mman.h": "c"
-    }
+    },
+    "makefile.configureOnOpen": false
 }
