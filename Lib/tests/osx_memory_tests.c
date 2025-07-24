@@ -67,12 +67,13 @@ static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitP
 
 	// Act
 	void *result = buddyAlloc(size);
-	struct Header *header = ((struct Header *)(result - HEADER_SIZE));
+	struct Header *header = (result - HEADER_SIZE);
 	int resultSize = header->size;
 
 	// Assert
 	munit_assert_ptr_not_null(result);
 	munit_assert_int(resultSize, ==, expSize);
+	munit_assert_int(header->free, ==, FALSE);
 
 	return MUNIT_OK;
 }
@@ -95,29 +96,21 @@ static MunitResult test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize(const 
 	return MUNIT_OK;
 }
 
-// TODO: This test wil
-static MunitResult test_buddyAlloc_splitsMemoryCorrectNumberOfTimes(const MunitParameter params[], void *fixture)
+static MunitResult test_buddyFree_freesMemoryRegion(const MunitParameter params[], void* fixture) 
 {
 	// Arrange
-	int initSize = 5;
-	buddyInitGlobal(initSize);
-
-	int size = 10;
-	int expMemorySize = 40;
-	int expNodes = (int)floor(log2(sysconf(_SC_PAGE_SIZE) / expMemorySize));
+	size_t order = 4;
+	size_t memSize = 32;
+	buddyInitGlobal(order);
 
 	// Act
-	void *memory = buddyAlloc(size);
-	int nodes = 0;
-	struct Header *node = (struct Header*)globalBuddyAllocator.start;
-	// while (node->next)
-	// {
-	// 	nodes++;
-	// 	node = node->next;
-	// }
+	void* memory = buddyAlloc(memSize);
+	buddyFree(memory);
+
+	struct Header* freeMemory = (memory - HEADER_SIZE);
 
 	// Assert
-	// munit_assert_int(nodes, ==, expNodes);
+	munit_assert_int(freeMemory->free, ==, TRUE);
 
 	return MUNIT_OK;
 }
@@ -165,12 +158,13 @@ static MunitTest tests[] = {
 	 tearDownGlobalBuddyAlloc,
 	 MUNIT_TEST_OPTION_NONE,
 	 NULL},
-	{"/test-buddyAlloc-splitsMemoryCorrectNumberOfTimes",
-	 test_buddyAlloc_splitsMemoryCorrectNumberOfTimes,
+	{"/test-buddyFree-freesMemoryRegion",
+	 test_buddyFree_freesMemoryRegion,
 	 NULL,
 	 tearDownGlobalBuddyAlloc,
 	 MUNIT_TEST_OPTION_NONE,
-	 NULL},
+	 NULL
+	},
 	// Required to end array with null terminating entry b/c otherwise munit seg faults
 	{NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 

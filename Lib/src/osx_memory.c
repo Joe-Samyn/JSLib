@@ -114,6 +114,7 @@ static void *search(size_t requestedSize)
     if (requestedSize < (bestFit->size / 2))
         bestFit = split(bestFit, requestedSize);
 
+    bestFit->free = FALSE;
     return bestFit;
 }
 
@@ -170,8 +171,17 @@ int buddyInitGlobal(size_t maxOrder)
 
 void *buddyAlloc(size_t requestedSize)
 {
-
     // TODO: We can probably use a ternary here and potentially a conditional data move which would result in better branch prediction
-    void *memory = search(requestedSize);
-    return memory ? memory + HEADER_SIZE : memory;
+    struct Header *memory = search(requestedSize);
+    return memory ? memory + 1 : memory;
+}
+
+void buddyFree(void* ptr) 
+{
+    struct Header* memory = ptr;
+    memory -= 1;
+
+    memory->free = TRUE;
+
+    // coalesce? 
 }

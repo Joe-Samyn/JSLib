@@ -2,12 +2,13 @@
     "makefile.launchConfigurations": [
         {
             "cwd": "/Users/joey/Projects/SystemsProgramming/JSLib/build",
-            "binaryPath": "/Users/joey/Projects/SystemsProgramming/JSLib/build/test.exe",
+            "binaryPath": "/Users/joey/Projects/SystemsProgramming/JSLib/Lib/build/test.exe",
             "binaryArgs": []
         }
     ],
     "files.associations": {
         "mman.h": "c"
     },
-    "makefile.configureOnOpen": false
+    "makefile.configureOnOpen": false,
+    "makefile.makefilePath": "Lib/Makefile"
 }
