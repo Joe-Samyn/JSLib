@@ -18,7 +18,6 @@
 struct BuddyAllocator globalBuddyAllocator = { 0x0 };
 int errorCode = NO_ERR;
 
-/** ************ Internal Functions ************* */
 
 /**
  * Recursively splits a block of memory in half until the size of the block is at least `requestedSize`.
@@ -82,10 +81,10 @@ static void *search(size_t requestedSize)
     // TODO: This is not a good solution. We need a freelist implementation, preferable using a self balancing tree to make
     // free memory lookups fast: O(lg(n)) time
     void* node = globalBuddyAllocator.start;
-    struct Header* bestFit = NULL;
+    struct Header *bestFit = NULL;
     while (node < globalBuddyAllocator.end)
     {
-        struct Header* temp = (struct Header*)node;
+        struct Header *temp = (struct Header*)node;
 
         // TODO: When a freelist is implemented, bestFit can be set to the root free node and the NULL check will not be required
         if (temp->free)
@@ -118,7 +117,27 @@ static void *search(size_t requestedSize)
     return bestFit;
 }
 
-/** ************ External Functions ************* */
+/**
+ * DRAFT: Attemps to coalesce a memory region with its buddy to create one unified block of memory. 
+ * This is only called/attempted with memory is freed. Memory must be an address that is managed by the global allocator. 
+ * 
+ * @param memory The memory region to coalesce with its neighbors
+ */
+static int coalesce(struct Header *memory) 
+{
+    size_t memorySize = power(2, memory->order);
+
+    // Get Buddy
+    struct Header *buddy = (struct Header *)((uintptr_t)memory ^ memorySize);
+    if (buddy->free) 
+    {
+        // Join 
+    }
+
+    return 0;
+}
+
+
 int buddyInitGlobal(size_t maxOrder)
 {
 
@@ -184,4 +203,5 @@ void buddyFree(void* ptr)
     memory->free = TRUE;
 
     // coalesce? 
+    coalesce(memory);
 }
