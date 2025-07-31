@@ -200,6 +200,13 @@ void buddyFree(void* ptr)
     struct Header* memory = ptr;
     memory -= 1;
 
+    int result = (uintptr_t)memory ^ (uintptr_t)globalBuddyAllocator.start;
+    if ((result & (result - 1)) != 0)
+    {
+        // Memory address is invalid, do nothing and do not corrupt memory state
+        return;
+    }
+
     memory->free = TRUE;
 
     // coalesce? 
