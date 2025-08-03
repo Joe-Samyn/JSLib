@@ -1,10 +1,10 @@
-#include "munit.h"
-#include "jslib/memory.h"
 #include "memory_internal.h"
+#include "munit.h"
 #include "type.h"
+#include "jslib/memory.h"
 
-#include <unistd.h>
 #include <math.h> // TODO: Write own log function
+#include <unistd.h>
 
 /* =========== memory.h Tests ============ */
 
@@ -101,6 +101,8 @@ static MunitResult test_buddyFree_freesMemoryRegion(const MunitParameter params[
 	// Arrange
 	size_t order = 4;
 	size_t memSize = 32;
+	int s = sysconf(_SC_PAGE_SIZE);
+	size_t expectedOrder = log2(s);
 	buddyInitGlobal(order);
 
 	// Act
@@ -108,9 +110,11 @@ static MunitResult test_buddyFree_freesMemoryRegion(const MunitParameter params[
 	buddyFree(memory);
 
 	struct Header* freeMemory = (memory - HEADER_SIZE);
+	struct Header* root = globalBuddyAllocator.start;
 
 	// Assert
 	munit_assert_int(freeMemory->free, ==, TRUE);
+	munit_assert_int(root->order, ==, expectedOrder);
 
 	return MUNIT_OK;
 }

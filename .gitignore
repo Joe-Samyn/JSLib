@@ -53,3 +53,6 @@ dkms.conf
 
 # Python packages and virtual environment 
 venv/
+
+# CLion files
+*.idea/

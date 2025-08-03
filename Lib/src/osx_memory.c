@@ -123,18 +123,20 @@ static void *search(size_t requestedSize)
  * 
  * @param memory The memory region to coalesce with its neighbors
  */
-static int coalesce(struct Header *memory) 
+static void coalesce(struct Header *memory)
 {
     size_t memorySize = power(2, memory->order);
 
     // Get Buddy
     struct Header *buddy = (struct Header *)((uintptr_t)memory ^ memorySize);
-    if (buddy->free) 
-    {
-        // Join 
-    }
 
-    return 0;
+    if (memory->order == globalBuddyAllocator.order || !buddy->free) return;
+
+    struct Header *lower = buddy < memory ? buddy : memory;
+    lower->order += 1;
+    lower->size = power(2, lower->order) - HEADER_SIZE;
+
+    coalesce(lower);
 }
 
 
@@ -200,10 +202,12 @@ void buddyFree(void* ptr)
     struct Header* memory = ptr;
     memory -= 1;
 
+    // Validate the gap between the start of the managed region and the address being freed
+    // is a power of 2. 
     int result = (uintptr_t)memory ^ (uintptr_t)globalBuddyAllocator.start;
     if ((result & (result - 1)) != 0)
     {
-        // Memory address is invalid, do nothing and do not corrupt memory state
+        // TODO: This should set the errorCode to a proper error status
         return;
     }
 
