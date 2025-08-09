@@ -70,7 +70,7 @@ static struct Header *split(struct Header *chunk, size_t requestedSize)
  * @param requestedSize The desired size of the memory block.
  * @return A pointer to the header (or start) of the block of memory
  */
-static void *search(size_t requestedSize)
+static byte *search(size_t requestedSize)
 {
 
     // requestedSize must be greater than 0 to get a valid memory region
@@ -149,7 +149,7 @@ int buddyInitGlobal(size_t maxOrder)
 {
 
     // Check if global buddy allocator has already been initialized
-    if (globalBuddyAllocator.start != 0x0)
+    if (globalBuddyAllocator.start != 0x0 || globalBuddyAllocator.initialized == TRUE)
     {
         return PREV_INIT;
     }
@@ -171,9 +171,7 @@ int buddyInitGlobal(size_t maxOrder)
 
     void *memory = mmap(NULL, allocatorSize, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 
-    // If we get here, something else failed that the user has no control over. Let them know an OS level error occurred with the library
-    
-    if (memory == MAP_FAILED)
+    if (memory == MAP_FAILED) // The mmap call failed for some reason, return an OS error to the user. It would be good to add some more detailed errors into a buffer somewhere the user could read from
     {
         return OS_ERR;
     }
@@ -181,7 +179,7 @@ int buddyInitGlobal(size_t maxOrder)
     // Initialize the global allocator with the starting address of the newly mapped memory region
     globalBuddyAllocator.start = memory;
     globalBuddyAllocator.order = maxOrder;
-    globalBuddyAllocator.end = globalBuddyAllocator.start + allocatorSize; // TODO: Need to convert to byte* instead of void*. Pointer arithmetic on void* is undefined in standard C
+    globalBuddyAllocator.end = globalBuddyAllocator.start + allocatorSize;
 
     // Initialization was successful if we reach this point
     return SUCCESS;
@@ -189,8 +187,8 @@ int buddyInitGlobal(size_t maxOrder)
 
 void *buddyAlloc(size_t requestedSize)
 {
-    struct Header *memory = search(requestedSize);
-    return memory ? memory + 1 : memory;
+    byte *userMemory = search(requestedSize);
+    return userMemory + HEADER_SIZE;
 }
 
 /**

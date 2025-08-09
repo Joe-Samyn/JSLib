@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include "type.h"
 
 /* Error Codes */
 /**
@@ -41,19 +42,19 @@ struct BuddyAllocator {
     /**
      * Root node of the memory pool
      */
-    void* start;
+    byte *start;
     /**
      * The end address of the memory region
      */
-    void* end;
+    byte *end;
     /**
      * Order of the entire memory block managed by this allocator
      */
-    size_t order;
+    unsigned int order;
     /**
      * Flag indicating if BuddyAllocator has been intialized previously
      */
-    int initialized;
+    unsigned int initialized;
 
 };
 

@@ -2,8 +2,9 @@
 #define TYPE_H
 
 #include <unistd.h>
+#include <stdint.h>
 
-#define byte char
+#define byte uint8_t
 
 #define TRUE 1
 #define FALSE 0
@@ -20,7 +21,7 @@ struct Header
     /**
      * Size in bytes of the user space (excluding header)
      */
-    unsigned int size;
+    size_t size;
     /**
      * A flag indicating whether the block of memory is free or allocated
      */
