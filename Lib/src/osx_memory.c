@@ -11,12 +11,11 @@
 #include "math.h"
 
 /**
- * TODO:
- *  - Pointer arithmetic is only byte level with void* on GCC/Clang, standard C it is undefined. I need to convert all instances where I am doing pointer arithmetic on void*
- *  to char or create a #define for byte
- *  - When dealing with sizes, do not use ints, use size_t. Its better for cross platform compatibility
- *  - Header is not aligned to a 8 byte boundary
- *  - Don't use global error code, apparently this is bad practice and its better to return error codes from the functions themselves
+ * TODO: Pointer arithmetic is only byte level with void* on GCC/Clang, standard C it is undefined. I need to convert all instances where I am doing pointer arithmetic on void* to char or create a #define for byte
+ * TODO: When dealing with sizes, do not use ints, use size_t. Its better for cross platform compatibility
+ * TODO: Header is not aligned to a 8 byte boundary
+ * TODO: Don't use global error code, apparently this is bad practice and its better to return error codes from the functions themselves
+ * TODO: Add freelist implementation to speed up memory allocation and deallocation
  */
 
 struct BuddyAllocator globalBuddyAllocator = { 0x0 };
@@ -82,7 +81,6 @@ static void *search(size_t requestedSize)
     }
 
     // Linearly search linked list for now.
-    // TODO: This is not a good solution. We need a freelist implementation, preferable using a self balancing tree to make
     // free memory lookups fast: O(lg(n)) time
     void* node = globalBuddyAllocator.start;
     struct Header *bestFit = NULL;
@@ -143,66 +141,47 @@ static void coalesce(struct Header *memory)
     coalesce(lower);
 }
 
-
+/**
+ * TODO: maxOrder should not exceed the maximum amount of memory that can be allocated on a device
+ * TODO: Return error code that maps to proper error that occurred, don't set global error code
+ */
 int buddyInitGlobal(size_t maxOrder)
 {
 
     // Check if global buddy allocator has already been initialized
     if (globalBuddyAllocator.start != 0x0)
     {
-        errorCode = PREV_INIT;
-        return ERROR;
+        return PREV_INIT;
     }
 
     // Ensure maxOrder is valid before proceeding to mmap call
-    // TODO: maxOrder should not exceed the maximum amount of memory that can be allocated on a device
-    if (maxOrder <= 0)
+    if (maxOrder <= 0 || maxOrder > MAX_ORDER)
     {
-        errorCode = INVAL_ARG;
-        return ERROR;
+        return INVAL_ARG;
     }
 
     // We must add HEADER_SIZE here or the user may end up with less memory than they were expecting
-    // TODO: This is a dumb way to determine the power of 2, it can easily be done with bit shifting
-    // TODO: Why are we adding header size and performing more arithmetic, we can simply just increase to the next power of 2
     // IF we are adding more to something that is already a power two, the only option is to round up to the next power of 2
     int allocatorSize = (0b1 << maxOrder);
-    size_t pageSize = sysconf(_SC_PAGE_SIZE);
-
-    // TODO: Align can probably be accomplished with bit shifting as well, and it may be more performant
-    // TODO: Do we even need to align if we are mmap-ing a region?
-    // TODO: We don't need to align to page size, we just need to align to power of 2. If we do not use the entire 
-    // region of the mapped page, thats fine. Let mmap take the amount of memory we need and map it to a page itself
-    int size = align(allocatorSize, pageSize);
 
     // size cannot and should not be 0 here. If size is 0, there is a bug
 #if DEBUG
     assert(size != 0);
 #endif 
 
-    void *memory = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    void *memory = mmap(NULL, allocatorSize, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 
     // If we get here, something else failed that the user has no control over. Let them know an OS level error occurred with the library
-    // TODO: Return error code that maps to proper error that occurred, don't set global error code
+    
     if (memory == MAP_FAILED)
     {
-        errorCode = OS_ERR;
-        return ERROR;
+        return OS_ERR;
     }
 
-    // Convert the mapped memory region to a header struct to store metadata about the
-    // newly obtained block of memory
-    // TODO: Can probably do this much cleaner
-    struct Header *header = (struct Header *)memory;
-    header->size = size - HEADER_SIZE;
-    header->free = TRUE;
-    // TODO: We will have the order from above, don't recalculate it
-    header->order = log2(size); 
-
     // Initialize the global allocator with the starting address of the newly mapped memory region
-    globalBuddyAllocator.start = header;
-    globalBuddyAllocator.order = header->order; // TODO: Don't do a memory access here, we have the order above
-    globalBuddyAllocator.end = globalBuddyAllocator.start + size;
+    globalBuddyAllocator.start = memory;
+    globalBuddyAllocator.order = maxOrder;
+    globalBuddyAllocator.end = globalBuddyAllocator.start + allocatorSize; // TODO: Need to convert to byte* instead of void*. Pointer arithmetic on void* is undefined in standard C
 
     // Initialization was successful if we reach this point
     return SUCCESS;
@@ -210,11 +189,13 @@ int buddyInitGlobal(size_t maxOrder)
 
 void *buddyAlloc(size_t requestedSize)
 {
-    // TODO: We can probably use a ternary here and potentially a conditional data move which would result in better branch prediction
     struct Header *memory = search(requestedSize);
     return memory ? memory + 1 : memory;
 }
 
+/**
+ * TODO: Return error code that maps to proper error that occurred, don't set global error code
+ */
 void buddyFree(void* ptr) 
 {
     struct Header* memory = ptr;
@@ -225,7 +206,6 @@ void buddyFree(void* ptr)
     int result = (uintptr_t)memory ^ (uintptr_t)globalBuddyAllocator.start;
     if ((result & (result - 1)) != 0)
     {
-        // TODO: This should set the errorCode to a proper error status
         return;
     }
 

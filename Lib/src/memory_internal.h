@@ -17,6 +17,7 @@ The minimum order for the buddy allocator to support ARM 64 alignment requiremen
 of 2^3 = 8 bytes.
 */ 
 #define MIN_ORDER 3
+#define MAX_ORDER 40 // Maximum order for ARM 64 systems, can be adjusted based on system capabilities
 #elif defined(__x86_64__)
 /**
 The minimum order for the buddy allocator to support x86-64 alignment requirements. This results in an alignment
