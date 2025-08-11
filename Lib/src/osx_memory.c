@@ -92,7 +92,7 @@ static byte *search(size_t requestedSize)
         node += next;
     }
 
-    if (requestedSize < (bestFit->size / 2))
+    if (requestedSize < (bestFit->size >> 1))
         bestFit = split(bestFit, requestedSize);
 
     return bestFit;
