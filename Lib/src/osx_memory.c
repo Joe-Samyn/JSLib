@@ -72,50 +72,29 @@ static struct Header *split(struct Header *chunk, size_t requestedSize)
  */
 static byte *search(size_t requestedSize)
 {
-
-    // requestedSize must be greater than 0 to get a valid memory region
-    if (requestedSize <= 0)
-    {
-        errorCode = INVAL_ARG;
-        return NULL;
-    }
-
     // Linearly search linked list for now.
     // free memory lookups fast: O(lg(n)) time
-    void* node = globalBuddyAllocator.start;
+    struct Header* node = (struct Header*)globalBuddyAllocator.start;
     struct Header *bestFit = NULL;
     while (node < globalBuddyAllocator.end)
     {
-        struct Header *temp = (struct Header*)node;
-
         // TODO: When a freelist is implemented, bestFit can be set to the root free node and the NULL check will not be required
-        if (temp->free)
+        if (node->free && node->size > requestedSize)
         {
             // NOTE: This NULL check will go away once a freelist is implemented
-            if (bestFit == NULL)
+            if (bestFit == NULL || node->size < bestFit->size)
             {
                 bestFit = node;
             }
-            else if (temp->size > requestedSize && temp->size < bestFit->size)
-            {
-                bestFit = temp;
-            }
         }
 
-        size_t next = power(2, temp->order);
+        size_t next = (0b1 << node->order);
         node += next;
-    }
-
-    if (bestFit == NULL)
-    {
-        errorCode = NO_MEM;
-        return NULL;
     }
 
     if (requestedSize < (bestFit->size / 2))
         bestFit = split(bestFit, requestedSize);
 
-    bestFit->free = FALSE;
     return bestFit;
 }
 
@@ -187,8 +166,21 @@ int buddyInitGlobal(size_t maxOrder)
 
 void *buddyAlloc(size_t requestedSize)
 {
+    // TODO: We could update to return the minimum amount of space
+    if (requestedSize > (0b1 << globalBuddyAllocator.order) || requestedSize <= 0)
+    {
+        return NULL;
+    }
+    
     byte *userMemory = search(requestedSize);
-    return userMemory + HEADER_SIZE;
+    if (userMemory != NULL)
+    {
+        struct Header* header = (struct Header*)userMemory;
+        header->free = FALSE;
+        return userMemory + HEADER_SIZE;
+    }
+
+    return NULL;
 }
 
 /**
