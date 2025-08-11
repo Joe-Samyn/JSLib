@@ -74,28 +74,29 @@ static byte *search(size_t requestedSize)
 {
     // Linearly search linked list for now.
     // free memory lookups fast: O(lg(n)) time
-    struct Header* node = (struct Header*)globalBuddyAllocator.start;
+    byte *node = globalBuddyAllocator.start;
     struct Header *bestFit = NULL;
     while (node < globalBuddyAllocator.end)
     {
+        struct Header* temp = (struct Header*)globalBuddyAllocator.start;
         // TODO: When a freelist is implemented, bestFit can be set to the root free node and the NULL check will not be required
-        if (node->free && node->size > requestedSize)
+        if (temp->free && temp->size > requestedSize)
         {
             // NOTE: This NULL check will go away once a freelist is implemented
-            if (bestFit == NULL || node->size < bestFit->size)
+            if (bestFit == NULL || temp->size < bestFit->size)
             {
-                bestFit = node;
+                bestFit = temp;
             }
         }
 
-        size_t next = (0b1 << node->order);
+        size_t next = (0b1 << temp->order);
         node += next;
     }
 
     if (requestedSize < (bestFit->size >> 1))
         bestFit = split(bestFit, requestedSize);
 
-    return bestFit;
+    return (byte *)bestFit;
 }
 
 /**
