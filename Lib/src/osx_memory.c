@@ -34,28 +34,30 @@ int errorCode = NO_ERR;
  * @returns A pointer to the memory block whose size in bytes is greater than or equal to `requestedSize`. If no block is found, NO_MEM is set as the global error code and NULL
  * is returned.
  */
+// TODO: Convert to order instead of passing around request size. Might be easiser to handle arithmetic since its always + or - 1
+// TODO: Recursion is easier to read but less performant, probably should convert to loop
 static struct Header *split(struct Header *chunk, size_t requestedSize)
 {
     // Recursion break condition
-    if ((requestedSize + HEADER_SIZE) >= (chunk->size / 2))
+    if (requestedSize >= (chunk->size >> 1))
     {
         return chunk;
     }
 
-    void *memory = chunk;
-
     // Split the chunk in half, which can be achieved simply by subtracting 1 from the order
     size_t newOrder = (chunk->order - 1);
-    size_t newSize = 1 << newOrder;
+    size_t newSize = (0b1 << newOrder) - HEADER_SIZE;
 
     // Create new buddy node
-    struct Header *buddy = (struct Header *)((uintptr_t)memory ^ newSize);
-    buddy->size = newSize - HEADER_SIZE;
+    struct Header *buddy = (struct Header *)((uintptr_t)chunk ^ newSize);
+    buddy->size = newSize;
     buddy->free = TRUE;
     buddy->order = newOrder;
 
-    // Update existing chunk to new size and attach its buddy
-    chunk->size = newSize - HEADER_SIZE;
+    // TODO: Add buddy to freelist
+
+    // Update existing chunk to new size
+    chunk->size = newSize;
     chunk->order = newOrder;
 
     return split(chunk, requestedSize);
@@ -161,12 +163,19 @@ int buddyInitGlobal(size_t maxOrder)
     globalBuddyAllocator.order = maxOrder;
     globalBuddyAllocator.end = globalBuddyAllocator.start + allocatorSize;
 
+    // Initialize a header for the entire block of free memory 
+    struct Header* globalHeader = (struct Header*)globalBuddyAllocator.start;
+    globalHeader->free = TRUE;
+    globalHeader->order = maxOrder;
+    globalHeader->size = allocatorSize - HEADER_SIZE;
+
     // Initialization was successful if we reach this point
     return SUCCESS;
 }
 
 void *buddyAlloc(size_t requestedSize)
 {
+    requestedSize += HEADER_SIZE;
     // TODO: We could update to return the minimum amount of space
     if (requestedSize > (0b1 << globalBuddyAllocator.order) || requestedSize <= 0)
     {

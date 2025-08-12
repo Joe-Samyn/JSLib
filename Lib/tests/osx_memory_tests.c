@@ -26,7 +26,6 @@ static MunitResult test_buddyInitGlobal_initializesGlobalBuddyAllocatorOnlyOnce(
 {
 	// Arrange
 	int size = 10;
-	int expErr = PREV_INIT;
 
 	// Act
 	int firstInit = buddyInitGlobal(size);
@@ -34,8 +33,7 @@ static MunitResult test_buddyInitGlobal_initializesGlobalBuddyAllocatorOnlyOnce(
 
 	// Assert
 	munit_assert_int(firstInit, ==, SUCCESS);
-	munit_assert_int(result, ==, ERROR);
-	munit_assert_int(errorCode, ==, expErr);
+	munit_assert_int(result, ==, PREV_INIT);
 
 	return MUNIT_OK;
 }
@@ -50,8 +48,7 @@ static MunitResult test_buddyInitGlobal_failsWithErrorWhenMaxOrderZeroOrLess(con
 	int result = buddyInitGlobal(size);
 
 	// Assert
-	munit_assert_int(result, ==, ERROR);
-	munit_assert_int(errorCode, ==, expErr);
+	munit_assert_int(result, ==, expErr);
 
 	return MUNIT_OK;
 }
@@ -67,12 +64,12 @@ static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitP
 
 	// Act
 	void *result = buddyAlloc(size);
-	struct Header *header = (result - HEADER_SIZE);
-	int resultSize = header->size;
+	// TODO: Probably a good idea to move this into a function called getHeader() because we perform this operation a lot in tests
+	struct Header *header = (struct Header*)(result - HEADER_SIZE);
 
 	// Assert
 	munit_assert_ptr_not_null(result);
-	munit_assert_int(resultSize, ==, expSize);
+	munit_assert_int(header->size, ==, expSize);
 	munit_assert_int(header->free, ==, FALSE);
 
 	return MUNIT_OK;
