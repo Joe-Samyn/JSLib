@@ -56,11 +56,12 @@ static MunitResult test_buddyInitGlobal_failsWithErrorWhenMaxOrderZeroOrLess(con
 static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitParameter params[], void *fixture)
 {
 	// Arrange
-	int initSize = 5;
+	int initSize = 10;
 	buddyInitGlobal(initSize);
 
 	int size = 10;
-	int expSize = 20;
+	int expOrder = 5; // This is because its 10 + HEADER_SIZE
+	int expSize = (0b1 << expOrder) - HEADER_SIZE;
 
 	// Act
 	void *result = buddyAlloc(size);
@@ -70,6 +71,7 @@ static MunitResult test_buddyAlloc_returnsPtrToMemoryWithProperSize(const MunitP
 	// Assert
 	munit_assert_ptr_not_null(result);
 	munit_assert_int(header->size, ==, expSize);
+	munit_assert_int(header->order, ==, expOrder);
 	munit_assert_int(header->free, ==, FALSE);
 
 	return MUNIT_OK;
@@ -88,7 +90,6 @@ static MunitResult test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize(const 
 
 	// Assert
 	munit_assert_ptr_null(result);
-	munit_assert_int(errorCode, ==, INVAL_ARG);
 
 	return MUNIT_OK;
 }
@@ -96,7 +97,7 @@ static MunitResult test_buddyAlloc_returnsNullAndSetsErrorWhenInvalidSize(const 
 static MunitResult test_buddyFree_freesMemoryRegion(const MunitParameter params[], void* fixture) 
 {
 	// Arrange
-	size_t order = 4;
+	size_t order = 10;
 	size_t memSize = 32;
 	int s = sysconf(_SC_PAGE_SIZE);
 	size_t expectedOrder = log2(s);

@@ -36,10 +36,11 @@ int errorCode = NO_ERR;
  */
 // TODO: Convert to order instead of passing around request size. Might be easiser to handle arithmetic since its always + or - 1
 // TODO: Recursion is easier to read but less performant, probably should convert to loop
+// TODO: Split is wrong, it is not splitting on proper boundaries. 
 static struct Header *split(struct Header *chunk, size_t requestedSize)
 {
     // Recursion break condition
-    if (requestedSize >= (chunk->size >> 1))
+    if (requestedSize >= (0b1 << (chunk->order - 1)))
     {
         return chunk;
     }
@@ -95,7 +96,7 @@ static byte *search(size_t requestedSize)
         node += next;
     }
 
-    if (requestedSize < (bestFit->size >> 1))
+    if (bestFit && requestedSize < (bestFit->size >> 1))
         bestFit = split(bestFit, requestedSize);
 
     return (byte *)bestFit;
@@ -203,7 +204,7 @@ void buddyFree(void* ptr)
 
     // Validate the gap between the start of the managed region and the address being freed
     // is a power of 2. 
-    int result = (uintptr_t)memory ^ (uintptr_t)globalBuddyAllocator.start;
+    int result = (uintptr_t)memory - (uintptr_t)globalBuddyAllocator.start;
     if ((result & (result - 1)) != 0)
     {
         return;
