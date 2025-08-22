@@ -99,20 +99,18 @@ static MunitResult test_buddyFree_freesMemoryRegion(const MunitParameter params[
 	// Arrange
 	size_t order = 10;
 	size_t memSize = 32;
-	int s = sysconf(_SC_PAGE_SIZE);
-	size_t expectedOrder = log2(s);
 	buddyInitGlobal(order);
 
 	// Act
 	void* memory = buddyAlloc(memSize);
 	buddyFree(memory);
 
-	struct Header* freeMemory = (memory - HEADER_SIZE);
+	struct Header* freeMemory = (struct Header*)(memory - HEADER_SIZE);
 	struct Header* root = globalBuddyAllocator.start;
 
 	// Assert
 	munit_assert_int(freeMemory->free, ==, TRUE);
-	munit_assert_int(root->order, ==, expectedOrder);
+	munit_assert_int(root->order, ==, order);
 
 	return MUNIT_OK;
 }

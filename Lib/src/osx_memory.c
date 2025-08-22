@@ -110,16 +110,19 @@ static byte *search(size_t requestedSize)
  */
 static void coalesce(struct Header *memory)
 {
-    size_t memorySize = power(2, memory->order);
+    // Can return immediately if we are at the max order
+    if (memory->order == globalBuddyAllocator.order) return;
 
     // Get Buddy
+    size_t memorySize = (0b1 << memory->order);
     struct Header *buddy = (struct Header *)((uintptr_t)memory ^ memorySize);
 
-    if (memory->order == globalBuddyAllocator.order || !buddy->free) return;
+    // If we cannot join with buddy, return
+    if (!buddy->free) return;
 
     struct Header *lower = buddy < memory ? buddy : memory;
     lower->order += 1;
-    lower->size = power(2, lower->order) - HEADER_SIZE;
+    lower->size = (memorySize << 1) - HEADER_SIZE;
 
     coalesce(lower);
 }
@@ -202,13 +205,7 @@ void buddyFree(void* ptr)
     struct Header* memory = ptr;
     memory -= 1;
 
-    // Validate the gap between the start of the managed region and the address being freed
-    // is a power of 2. 
-    int result = (uintptr_t)memory - (uintptr_t)globalBuddyAllocator.start;
-    if ((result & (result - 1)) != 0)
-    {
-        return;
-    }
+    // TODO: What validation can we perform to see if this is a valid memory address? Do we want to even do validation? 
 
     memory->free = TRUE;
 
