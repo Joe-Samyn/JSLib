@@ -47,18 +47,18 @@ static struct Header *split(struct Header *chunk, size_t requestedSize)
 
     // Split the chunk in half, which can be achieved simply by subtracting 1 from the order
     size_t newOrder = (chunk->order - 1);
-    size_t newSize = (0b1 << newOrder) - HEADER_SIZE;
+    size_t newSize = (0b1 << newOrder);
 
     // Create new buddy node
     struct Header *buddy = (struct Header *)((uintptr_t)chunk ^ newSize);
-    buddy->size = newSize;
+    buddy->size = newSize - HEADER_SIZE;
     buddy->free = TRUE;
     buddy->order = newOrder;
 
     // TODO: Add buddy to freelist
 
     // Update existing chunk to new size
-    chunk->size = newSize;
+    chunk->size = newSize - HEADER_SIZE;
     chunk->order = newOrder;
 
     return split(chunk, requestedSize);
